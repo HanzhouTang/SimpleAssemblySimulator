@@ -23,5 +23,11 @@
     <MASM Include="add_.asm">
       <Filter>Source Files</Filter>
     </MASM>
+    <MASM Include="divid_.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="MemoryAddressing_.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
