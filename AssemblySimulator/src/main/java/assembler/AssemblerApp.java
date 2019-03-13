@@ -3,10 +3,7 @@ package assembler;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.BasicConfigurator;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class App {
+public class AssemblerApp {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
         if (args.length == 1) {
@@ -16,7 +13,7 @@ public class App {
                 System.out.println("Must be an assembly file");
                 System.exit(-1);
             } else {
-                Lexer lexer = new Lexer();
+                SimpleLexer lexer = new SimpleLexer();
                 lexer.readFile(filename);
                 Token token = Token.Invalid;
                 while (token != Token.EndofContent) {

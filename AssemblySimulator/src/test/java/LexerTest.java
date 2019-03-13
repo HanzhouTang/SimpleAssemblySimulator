@@ -1,4 +1,4 @@
-import assembler.Lexer;
+import assembler.SimpleLexer;
 import assembler.Token;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
@@ -9,19 +9,21 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 
 public class LexerTest {
+
     @Before
     public void setup(){
         BasicConfigurator.configure();
     }
+
     @Test
     public void readFile() throws Exception{
         URI uri = getClass().getClassLoader().getResource("add_.asm").toURI();
         Assert.assertNotNull(uri);
         String filename = Paths.get(uri).toString();
-        Lexer lexer = new Lexer();
+        SimpleLexer lexer = new SimpleLexer();
         lexer.readFile(filename);
         Assert.assertNotNull(lexer.getLines());
     }
@@ -31,7 +33,7 @@ public class LexerTest {
         URI uri = getClass().getClassLoader().getResource("add_.asm").toURI();
         Assert.assertNotNull(uri);
         String filename = Paths.get(uri).toString();
-        Lexer lexer = new Lexer();
+        SimpleLexer lexer = new SimpleLexer();
         lexer.readFile(filename);
         Assert.assertNotNull(lexer.getLines());
         Assert.assertNotEquals(0,lexer.getLines().size());
@@ -42,7 +44,7 @@ public class LexerTest {
         URI uri = getClass().getClassLoader().getResource("MemoryAddressing_.asm").toURI();
         Assert.assertNotNull(uri);
         String filename = Paths.get(uri).toString();
-        Lexer lexer = new Lexer();
+        SimpleLexer lexer = new SimpleLexer();
         lexer.readFile(filename);
         Assert.assertNotNull(lexer.getLines());
         Assert.assertNotEquals(0,lexer.getLines().size());
