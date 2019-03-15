@@ -22,7 +22,7 @@ public class BitSetUtils {
 
     public static String toString(final BitSet bitSet) {
         if (bitSet.isEmpty()) {
-            return "0";
+            return "";
         } else {
             return Long.toString(bitSet.toLongArray()[0], 2);
         }
