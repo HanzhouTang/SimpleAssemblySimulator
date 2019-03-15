@@ -1,7 +1,5 @@
 package Instructions;
 
-import org.apache.log4j.Logger;
-
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
@@ -62,7 +60,7 @@ public enum OpCode implements Op {
     }
 
     @Override
-    public BitSet getOpCode() {
+    public BitSet getBits() {
         return (BitSet) bitSet.clone();
     }
 
@@ -74,7 +72,7 @@ public enum OpCode implements Op {
             .collect(Collectors.toMap(Object::toString, Function.identity()));
 
     private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
-            .collect(Collectors.toMap(op -> BitSetUtils.toString(op.getOpCode(), 6), Function.identity()));
+            .collect(Collectors.toMap(op -> BitSetUtils.toString(op.getBits(), 6), Function.identity()));
 
     public static Optional<Op> fromString(final String mem) {
         return Optional.ofNullable(stringToOpCode.get(mem.toUpperCase()));

@@ -30,7 +30,7 @@ public class BitSetUtilsTest {
         BitSet bitSet = new BitSet();
         bitSet.clear();
         final  String result = BitSetUtils.toString(bitSet);
-        Assert.assertEquals("0",result);
+        Assert.assertEquals("",result);
         final  String result1 = BitSetUtils.toString(bitSet,6);
         Assert.assertEquals("000000",result1);
     }
