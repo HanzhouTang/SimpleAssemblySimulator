@@ -77,6 +77,7 @@ public class SimpleLexer implements Lexer {
         return Pair.of(record.getKey(), retStr);
     }
 
+    @Override
     public void readFile(String filename) throws Exception {
         AtomicInteger counter = new AtomicInteger();
         lines = Files.lines(Paths.get(filename))
@@ -101,6 +102,7 @@ public class SimpleLexer implements Lexer {
         return i;
     }
 
+    @Override
     public Token getNextToken() throws Exception {
         if (!status.getIterator().hasNext()) {
             return Token.EndofContent;
