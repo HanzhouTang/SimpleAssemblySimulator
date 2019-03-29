@@ -8,5 +8,5 @@ public abstract class Instruction {
     protected  Op getOpcode(){
         return opcode;
     }
-    public abstract int toInt();
+    public abstract byte[]  toBytes();
 }

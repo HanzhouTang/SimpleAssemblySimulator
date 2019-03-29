@@ -87,13 +87,13 @@ public enum OpCode implements Op {
         return Optional.ofNullable(bitsToOpCode.get(opcode));
     }
 
-    private static final Map<String, Op> stringToOpCode = Stream.of(OpCode.values())
+    private static final Map<String, Op> memToOpCode = Stream.of(OpCode.values())
             .collect(Collectors.toMap(Object::toString, Function.identity()));
 
     private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
             .collect(Collectors.toMap(Op::getOpCode, Function.identity()));
 
-    public static Optional<Op> fromString(final String mem) {
-        return Optional.ofNullable(stringToOpCode.get(mem.toUpperCase()));
+    public static Optional<Op> fromMem(final String mem) {
+        return Optional.ofNullable(memToOpCode.get(mem.toUpperCase()));
     }
 }

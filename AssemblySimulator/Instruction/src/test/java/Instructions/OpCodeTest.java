@@ -20,12 +20,11 @@ public class OpCodeTest {
     public void getOpCodeFromValue(){
         Op LODSB = OpCode.valueOf("LODSB");
         Assert.assertEquals(OpCode.LODSB, LODSB);
-
     }
 
     @Test
     public void getOpCodeFromStr(){
-        Optional<Op> repne = OpCode.fromString("REPNE");
+        Optional<Op> repne = OpCode.fromMem("REPNE");
         Assert.assertEquals(Optional.of(REPNE),repne);
     }
 

@@ -5,16 +5,16 @@ import org.apache.log4j.Logger;
 import java.util.BitSet;
 
 public interface Op {
-    final static int SIZE = 6;
-    final static Logger OPLOGGER = Logger.getLogger(Op.class);
+    int SIZE = 6;
+    Logger OPLOGGER = Logger.getLogger(Op.class);
 
-    public String getMemonic();
+    String getMemonic();
 
-    public BitSet getBits();
+    BitSet getBits();
 
-    public String getOpCode();
+    String getOpCode();
 
-    public default  Logger getOpLogger(){
+    default Logger getOpLogger() {
         return OPLOGGER;
     }
 }

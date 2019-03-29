@@ -1,5 +1,5 @@
 package Instructions;
 
-public enum RegisterSize {
+public enum RegisterLength {
     EIGHT, SIXTEEN,THIRY_TWO
 }

@@ -1,4 +1,5 @@
-import common.BitSetUtils;
+package common;
+
 import org.junit.Assert;
 import org.junit.Test;
 
