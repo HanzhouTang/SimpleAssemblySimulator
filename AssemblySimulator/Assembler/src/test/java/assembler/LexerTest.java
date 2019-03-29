@@ -1,3 +1,5 @@
+package assembler;
+
 import assembler.SimpleLexer;
 import assembler.Token;
 import org.junit.Assert;

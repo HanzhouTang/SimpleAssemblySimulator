@@ -1,3 +1,5 @@
+package assembler;
+
 import assembler.AssemblerConfig;
 import assembler.SimpleLexer;
 import assembler.SimpleParser;
