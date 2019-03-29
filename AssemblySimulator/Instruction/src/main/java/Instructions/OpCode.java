@@ -1,5 +1,7 @@
 package Instructions;
 
+import common.BitSetUtils;
+
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
@@ -8,50 +10,55 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum OpCode implements Op {
-    MOV("000000"),
-    PUSH("000001"),
-    POP("000010"),
-    ADD("000011"),
-    SUB("000100"),
-    CBW("000101"),
-    CWD("000110"),
-    BSWAP("000111"),
-    AND("001000"),
-    OR("001001"),
-    XOR("001010"),
-    NOT("001011"),
-    SAL("001100"),
-    PHL("001101"),
-    SAR("001111"),
-    SHR("010000"),
-    CMPSB("010001"),
-    CMPSW("010010"),
-    CMPSD("010011"),
-    LODSB("010100"),
-    LODSW("010101"),
-    LODSD("010110"),
-    STOSB("010111"),
-    STOSW("011000"),
-    STOSD("011001"),
-    REP("011010"),
-    REPNE("011011"),
-    JMP("011100"),
-    JCC("011101"),
-    JECXZ("011110"),
-    CALL("011111"),
-    RET("100000"),
-    ENTER("100001"),
-    LEAVE("100010"),
-    LOOP("100011"),
-    LOOPE("100100"),
-    LOOPZ("100101"),
-    LOOPNE("100110"),
-    LOOPNZ("100111"),
-    NOP("101000");
-    private final BitSet bitSet;
+    ADD("000000"),
+    ADC("000001"),
+    SUB("000010"),
+    SBB("000011"),
+    MUL("000100"),
+    DIV("000101"),
+    MOV("000110"),
+    PUSH("000111"),
+    POP("001000"),
+    CBW("001001"),
+    CWD("001010"),
+    BSWAP("001011"),
+    AND("001100"),
+    OR("001101"),
+    XOR("001110"),
+    NOT("001111"),
+    SAL("010000"),
+    SHL("010001"),
+    SAR("010010"),
+    SHR("010011"),
+    CMPSB("010100"),
+    CMPSW("010101"),
+    CMPSD("010110"),
+    LODSB("010111"),
+    LODSW("011000"),
+    LODSD("011001"),
+    STOSB("011010"),
+    STOSW("011011"),
+    STOSD("011100"),
+    REP("011101"),
+    REPNE("011110"),
+    JMP("011111"),
+    JCC("100000"),
+    JECXZ("100001"),
+    CALL("100010"),
+    RET("100011"),
+    ENTER("100100"),
+    LEAVE("100101"),
+    LOOP("100110"),
+    LOOPE("100111"),
+    LOOPZ("101000"),
+    LOOPNE("101001"),
+    LOOPNZ("101010"),
+    NOP("101011");
+    private final String opcode;
 
     OpCode( String bits) {
-        bitSet = BitSetUtils.fromString(bits);
+        assert bits.length() == Op.SIZE;
+        opcode = bits;
     }
 
     @Override
@@ -61,18 +68,30 @@ public enum OpCode implements Op {
 
     @Override
     public BitSet getBits() {
-        return (BitSet) bitSet.clone();
+        BitSet bitSet = null;
+        try{
+            bitSet = BitSetUtils.fromString(opcode);
+        }
+        catch (Exception e){
+            getOpLogger().info("catch exception " + e);
+        }
+        return bitSet;
     }
 
-    public static Optional<Op> of(final String bits) {
-        return Optional.ofNullable(bitsToOpCode.get(bits));
+    @Override
+    public  String getOpCode(){
+        return opcode;
+    }
+
+    public static Optional<Op> of(final String opcode) {
+        return Optional.ofNullable(bitsToOpCode.get(opcode));
     }
 
     private static final Map<String, Op> stringToOpCode = Stream.of(OpCode.values())
             .collect(Collectors.toMap(Object::toString, Function.identity()));
 
     private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
-            .collect(Collectors.toMap(op -> BitSetUtils.toString(op.getBits(), 6), Function.identity()));
+            .collect(Collectors.toMap(Op::getOpCode, Function.identity()));
 
     public static Optional<Op> fromString(final String mem) {
         return Optional.ofNullable(stringToOpCode.get(mem.toUpperCase()));

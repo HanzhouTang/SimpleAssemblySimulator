@@ -1,8 +1,6 @@
 import assembler.SimpleLexer;
 import assembler.Token;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
@@ -13,10 +11,7 @@ import java.util.List;
 
 public class LexerTest {
 
-    @Before
-    public void setup(){
-        BasicConfigurator.configure();
-    }
+
 
     @Test
     public void readFile() throws Exception{

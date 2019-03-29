@@ -1,15 +1,20 @@
 package Instructions;
 
+import org.apache.log4j.Logger;
+
 import java.util.BitSet;
 
 public interface Op {
+    final static int SIZE = 6;
+    final static Logger OPLOGGER = Logger.getLogger(Op.class);
+
     public String getMemonic();
+
     public BitSet getBits();
-    public default String getOpCodeStr() {
-        return BitSetUtils.toString(getBits(),6);
-    }
-    public default int toInt(){
-        int tmp = (int)getBits().toLongArray()[0];
-        return tmp << 24;
+
+    public String getOpCode();
+
+    public default  Logger getOpLogger(){
+        return OPLOGGER;
     }
 }

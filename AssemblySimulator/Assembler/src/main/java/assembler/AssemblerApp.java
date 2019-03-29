@@ -1,11 +1,9 @@
 package assembler;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.BasicConfigurator;
 
 public class AssemblerApp {
     public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure();
         if (args.length == 1) {
             final String filename = args[0];
             String ext = FilenameUtils.getExtension(filename);

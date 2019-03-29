@@ -1,4 +1,4 @@
-package Instructions;
+package common;
 
 import org.apache.log4j.Logger;
 
@@ -29,12 +29,13 @@ public class BitSetUtils {
 
     }
 
-    public static String toString(final BitSet bitSet, int size) {
+    public static String toString(final BitSet bitSet, int size) throws Exception{
         if (bitSet.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < size; i++) {
                 stringBuilder.append('0');
             }
+            LOGGER.debug("return "+stringBuilder.toString());
             return stringBuilder.toString();
         } else {
             final String value = toString(bitSet);
@@ -45,9 +46,11 @@ public class BitSetUtils {
                 for (int i = 0; i < size - value.length(); i++) {
                     stringBuilder.insert(0, '0');
                 }
+                LOGGER.debug("return "+stringBuilder.toString());
                 return stringBuilder.toString();
+
             } else {
-                return value.substring(value.length() - size);
+                throw new Exception("the size "+ size + "is too small for converting");
             }
         }
     }
