@@ -1,1 +1,4 @@
 http://www.c-jump.com/CIS77/CPU/x86/lecture.html
+http://www.skyfree.org/linux/references/ELF_Format.pdf
+https://wiki.osdev.org/ELF
+https://www.tutorialspoint.com/assembly_programming/assembly_introduction.htm

@@ -48,6 +48,6 @@ public enum EightBitsRegister implements Register {
             Stream.of(values()).collect(Collectors.toMap(Register::getRegisterName, Function.identity()));
 
     public static Optional<Register> fromName(String name) {
-        return Optional.ofNullable(nameToRegister.get(name));
+        return Optional.ofNullable(nameToRegister.get(name.toLowerCase()));
     }
 }
