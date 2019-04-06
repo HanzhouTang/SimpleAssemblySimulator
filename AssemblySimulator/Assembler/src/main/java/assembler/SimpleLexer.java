@@ -12,13 +12,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class SimpleLexer implements Lexer {
     private static final Logger LOGGER = Logger.getLogger(SimpleLexer.class);
-    private Map<Integer, String> lines = null;
-
-    public Map<Integer, String> getLines() {
+    //private Map<Integer, String> lines = null;
+    private List<SourceCodeWrapper> lines = null;
+    public List<SourceCodeWrapper> getLines() {
         return lines;
     }
 
@@ -83,13 +84,22 @@ public class SimpleLexer implements Lexer {
         lines = Files.lines(Paths.get(filename))
                 .collect(Collectors.toMap(s -> counter.incrementAndGet(), s -> s))
                 .entrySet().stream().map(this::stripComments).filter(x -> StringUtils.isNotEmpty(x.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (v1, v2) -> {
-                            throw new RuntimeException(String.format("Duplicate key for values %s and %s", v1, v2));
-                        },
-                        TreeMap::new));
+                .map(e -> new SourceCodeWrapper(e.getKey(),e.getValue())).collect(Collectors.toList());
+        if(lines.size()>0){
+            status = new Status();
+            status.setCodeOfCurrentLine(lines.get(0).getCode());
+        }
+        else{
+            throw  new Exception("file is empty");
+        }
+    }
 
-        status = new Status(lines.entrySet().iterator());
+    @Override
+    public List<Token> lookAheadK(int k){
+        Status oldStatus = new Status(getStatus());
+        List<Token> ret = Stream.generate(this::getNextToken).limit(k).collect(Collectors.toList());
+        setStatus(oldStatus);
+        return ret;
     }
 
     public static int findStr_if(final String str, final int begin, Predicate<Character> predicate) {
@@ -103,20 +113,24 @@ public class SimpleLexer implements Lexer {
     }
 
     @Override
-    public Token getNextToken() throws Exception {
-        if (!status.getIterator().hasNext()) {
+    public Token getNextToken() {
+        if (status.getIterator()>=lines.size()) {
             return Token.EndofContent;
         } else {
-            if (status.getCharIndex() == status.getCurrentLine().length()) {
-                Map.Entry<Integer, String> entry = status.getIterator().next();
+            if (status.getCharIndex() == status.getCodeOfCurrentLine().length()) {
+                status.setIterator(status.getIterator()+1);
+                if(status.getIterator()==lines.size()){
+                    return Token.EndofContent;
+                }
+                SourceCodeWrapper wrapper = lines.get(status.getIterator());
                 status.setCharIndex(0);
-                status.setCurrentLine(entry.getValue());
-                status.setLineIndex(entry.getKey());
+                status.setCodeOfCurrentLine(wrapper.getCode());
+                status.setLineIndex(wrapper.getLineNumber());
                 status.setCurrentToken(Token.Invalid);
                 status.setCurrentLexeme("");
             }
             status.setCurrentToken(Token.Invalid);
-            final String str = status.getCurrentLine();
+            final String str = status.getCodeOfCurrentLine();
             int i = findStr_if(str, status.getCharIndex(), ch -> ch == '\n' || !Character.isWhitespace(ch));
             int j = findStr_if(str, i, delimiters::contains);
             if (i == j) {
@@ -141,7 +155,8 @@ public class SimpleLexer implements Lexer {
                 }
             }
             if (status.getCurrentToken() == Token.Invalid) {
-                throw new Exception("the word (" + status.getCurrentLexeme() + ") at line " + status.getLineIndex() + " is invalid");
+                LOGGER.warn("the word (" + status.getCurrentLexeme() + ") at line " + status.getLineIndex() + " is invalid");
+                //throw new Exception("the word (" + status.getCurrentLexeme() + ") at line " + status.getLineIndex() + " is invalid");
             }
             return status.getCurrentToken();
         }

@@ -19,7 +19,7 @@ public class ParserTest {
     @Autowired
     SimpleParser simpleParser;
     @Test
-    public void intiParser() throws Exception{
+    public void intiParserTest() throws Exception{
         Assert.assertNotNull(simpleParser.getLexer());
     }
 }
