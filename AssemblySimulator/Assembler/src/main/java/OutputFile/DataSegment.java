@@ -1,5 +1,7 @@
 package OutputFile;
 
+import javax.xml.crypto.Data;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,10 +9,68 @@ import java.util.Map;
 
 public class DataSegment {
     List<Byte> data = new ArrayList<>();
-    Map<String,Integer> nameTable = new HashMap<>();
-    void addNmae(String name){
+    Map<String, Integer> nameTable = new HashMap<>();
+
+    public void addNmae(String name) {
         int currentLocation = data.size();
-        nameTable.put(name,currentLocation);
+        nameTable.put(name, currentLocation);
     }
 
+    public void addData(String str, DataType dataType) throws Exception {
+        for (byte b : str.getBytes("US-ASCII")) {
+            for (int i = 0; i < dataType.getSize() - 1; i++) {
+                final byte tmp = 0;
+                data.add(tmp);
+            }
+            data.add(b);
+        }
+    }
+
+    public void addData(BigInteger number, DataType dataType) throws Exception {
+        byte[] bytes = number.toByteArray();
+        if (bytes.length <= dataType.getSize()) {
+            for (int i = 0; i < dataType.getSize() - bytes.length; i++) {
+                final byte tmp = 0;
+                data.add(tmp);
+            }
+            for (byte b : bytes) {
+                data.add(b);
+            }
+        } else {
+            for (int i = bytes.length - dataType.getSize(); i < bytes.length; i++) {
+                data.add(bytes[i]);
+            }
+        }
+    }
+
+    public void addData(List<Byte> bytes) throws Exception {
+        data.addAll(bytes);
+    }
+
+    public List<Byte> getPortionFrom(int i) {
+
+        List<Byte> tmp = new ArrayList<>();
+        tmp.addAll(data.subList(i, data.size()));
+        return tmp;
+    }
+
+    public int getCurrentLocation() {
+        return data.size();
+    }
+
+    public int getLocationByName(String name) {
+        if (nameTable.containsKey(name)) {
+            return nameTable.get(name);
+        } else {
+            return -1;
+        }
+    }
+
+    public Byte get(int index) {
+        if (index < data.size()) {
+            return data.get(index);
+        } else {
+            return null;
+        }
+    }
 }

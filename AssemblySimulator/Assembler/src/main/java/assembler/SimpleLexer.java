@@ -41,6 +41,7 @@ public class SimpleLexer implements Lexer {
         delimiters.add('(');
         delimiters.add(')');
         delimiters.add('$');
+        delimiters.add('\'');
         char2Token.put(",", Token.Comma);
         char2Token.put(":", Token.Colon);
         char2Token.put("+", Token.Add);
@@ -53,10 +54,12 @@ public class SimpleLexer implements Lexer {
         char2Token.put("(", Token.LeftParent);
         char2Token.put(")", Token.RightParent);
         char2Token.put("$", Token.DollarSign);
+        char2Token.put("'",Token.Quote);
     }
 
     Status status = null;
 
+    @Override
     public Status getStatus() {
         return status;
     }
@@ -94,10 +97,21 @@ public class SimpleLexer implements Lexer {
         }
     }
 
+    private LexemeTokenWrapper getNextLexemeAndToken(){
+        Token token = getNextToken();
+        if(token.equals(Token.EndofContent)){
+            return new LexemeTokenWrapper(Token.EndofContent,"");
+        }
+        else{
+            return new LexemeTokenWrapper(getStatus().getCurrentToken(),getStatus().getCurrentLexeme());
+        }
+
+    }
+
     @Override
-    public List<Token> lookAheadK(int k){
+    public List<LexemeTokenWrapper> lookAheadK(int k){
         Status oldStatus = new Status(getStatus());
-        List<Token> ret = Stream.generate(this::getNextToken).limit(k).collect(Collectors.toList());
+        List<LexemeTokenWrapper> ret = Stream.generate(this::getNextLexemeAndToken).limit(k).collect(Collectors.toList());
         setStatus(oldStatus);
         return ret;
     }
