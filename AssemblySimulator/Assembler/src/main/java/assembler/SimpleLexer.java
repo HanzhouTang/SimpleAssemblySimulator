@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -96,6 +97,7 @@ public class SimpleLexer implements Lexer {
             throw  new Exception("file is empty");
         }
     }
+
 
     private LexemeTokenWrapper getNextLexemeAndToken(){
         Token token = getNextToken();

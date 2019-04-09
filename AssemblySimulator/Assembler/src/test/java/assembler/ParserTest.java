@@ -65,4 +65,35 @@ public class ParserTest {
         Assert.assertEquals(symbol,obj.getDataSegment().get(73));
         Assert.assertEquals(symbol,obj.getDataSegment().get(82));
     }
+    @Test
+    public  void dataSegmentExprTest() throws  Exception{
+        URI uri = getClass().getClassLoader().getResource("dataExpr_.asm").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        ObjFile obj = simpleParser.parse(filename);
+        Assert.assertEquals(4,obj.getDataSegment().getCurrentLocation());
+        Byte twelve = 12;
+        Byte thirteen = 13;
+        Byte fourteen = 14;
+        Byte negSeventeen = -17;
+        Byte negTwelve = -12;
+        Byte negTwentyOne = -21;
+        Assert.assertEquals(twelve,obj.getDataSegment().get(0));
+        Assert.assertEquals(thirteen,obj.getDataSegment().get(1));
+        Assert.assertEquals(fourteen,obj.getDataSegment().get(2));
+        Assert.assertEquals(negTwentyOne,obj.getDataSegment().get(3));
+    }
+    @Test
+    public  void dataSegmentExprTest1() throws  Exception{
+        URI uri = getClass().getClassLoader().getResource("dataExpr1_.asm").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        ObjFile obj = simpleParser.parse(filename);
+        Assert.assertEquals(10,obj.getDataSegment().getCurrentLocation());
+        Byte eight = 8;
+        Byte zero = 0;
+        Assert.assertEquals(eight,obj.getDataSegment().get(8));
+        Assert.assertEquals(zero,obj.getDataSegment().get(9));
+
+    }
 }

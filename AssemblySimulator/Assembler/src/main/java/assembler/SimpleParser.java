@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.xml.crypto.Data;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +51,7 @@ public class SimpleParser {
         LOGGER.info("in data Define");
         dataName(obj);
         Token token = lexer.getNextToken();
-        LOGGER.info("in data Define, token "+token);
+        LOGGER.info("in data Define, token " + token);
         if (token.equals(Token.String)) {
             String lexem = lexer.getStatus().getCurrentLexeme();
             Optional<DataType> dataType = DataType.of(lexem);
@@ -65,10 +66,10 @@ public class SimpleParser {
 
     protected void moreDataDefine(ObjFile obj) throws Exception {
         LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
-        if(wrapper.getToken().equals(Token.EndofContent)){
+        if (wrapper.getToken().equals(Token.EndofContent)) {
             return;
         }
-        LOGGER.info("wrapper token "+wrapper.getToken()+" lexeme ("+wrapper.getLexeme()+")");
+        LOGGER.info("wrapper token " + wrapper.getToken() + " lexeme (" + wrapper.getLexeme() + ")");
         if (wrapper.getToken().equals(Token.NewLine)) {
             match(Token.NewLine);
         }
@@ -119,25 +120,112 @@ public class SimpleParser {
             match(Token.String);
             obj.getDataSegment().addData(lexer.getStatus().currentLexeme, dataType);
             match(Token.Quote);
-        } else if (wrapper.getToken().equals(Token.Number)) {
-            match(Token.Number);
-            BigInteger number = new BigInteger(lexer.getStatus().currentLexeme);
-            obj.getDataSegment().addData(number, dataType);
         } else if (wrapper.getToken().equals(Token.String) && "dup".equals(wrapper.getLexeme())) {
             int currentLocation = obj.getDataSegment().getCurrentLocation();
             match(Token.String);
             match(Token.Number);
             int times = Integer.valueOf(lexer.getStatus().getCurrentLexeme());
-            LOGGER.info("dup times "+times+" current location "+currentLocation);
+            LOGGER.info("dup times " + times + " current location " + currentLocation);
             match(Token.LeftParent);
             dataList(obj, dataType);
-            LOGGER.info("after parse data list location "+obj.getDataSegment().getCurrentLocation());
+            LOGGER.info("after parse data list location " + obj.getDataSegment().getCurrentLocation());
             List<Byte> tmpData = obj.getDataSegment().getPortionFrom(currentLocation);
             for (int i = 1; i < times; i++) {
                 obj.getDataSegment().addData(tmpData);
             }
             match(Token.RightParent);
+        } else {
+            BigInteger number = expr(obj);
+            obj.getDataSegment().addData(number, dataType);
         }
+    }
+
+
+    protected BigInteger expr(ObjFile obj) throws Exception {
+        BigInteger term = term(obj);
+        return moreTerm(obj, term);
+    }
+
+    protected BigInteger term(ObjFile obj) throws Exception {
+        BigInteger factor = factor(obj);
+        return moreFactor(obj, factor);
+    }
+
+    //negative is not very good here
+    protected BigInteger moreTerm(ObjFile obj, BigInteger left) throws Exception {
+        LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+        if (wrapper.getToken().equals(Token.Add)) {
+            match(Token.Add);
+            BigInteger right = term(obj);
+            return moreFactor(obj, left.add(right));
+        } else if (wrapper.getToken().equals(Token.Sub)) {
+            match(Token.Sub);
+            BigInteger right = term(obj);
+            return moreFactor(obj, left.subtract(right));
+        }
+        return left;
+    }
+
+
+    protected BigInteger factor(ObjFile obj) throws Exception {
+        LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+        BigInteger number = null;
+        if (wrapper.getToken().equals(Token.Sub)) {
+            match(Token.Sub);
+            return factor(obj).negate();
+        } else if (wrapper.getToken().equals(Token.LeftParent)) {
+            match(Token.LeftParent);
+            number = expr(obj);
+            match(Token.RightParent);
+            return number;
+        }
+        wrapper = lexer.lookAheadK(1).get(0);
+        if (wrapper.getToken().equals(Token.Number)) {
+            match(Token.Number);
+            number = new BigInteger(lexer.getStatus().currentLexeme);
+        } else if (wrapper.getToken().equals(Token.String)) {
+            match(Token.String);
+            final String str = lexer.getStatus().getCurrentLexeme();
+            if ("sizeof".equals(str)) {
+                match(Token.String);
+                Optional<DataType> type = DataType.of(lexer.getStatus().getCurrentLexeme());
+                if (!type.isPresent()) {
+                    throw new Exception("not find data type define after sizeof operator at line " + lexer.getStatus().getLineIndex());
+                } else {
+                    number = BigInteger.valueOf(type.get().getSize());
+                }
+            } else {
+                int location = obj.getDataSegment().getLocationByName(str);
+                if (location == -1) {
+                    throw new Exception("not find label " + str + " at line " + lexer.getStatus().getLineIndex());
+                } else {
+                    number = BigInteger.valueOf(location);
+                }
+            }
+        } else if (wrapper.getToken().equals(Token.DollarSign)) {
+            match(Token.DollarSign);
+            int location = obj.getDataSegment().getCurrentLocation();
+            number = BigInteger.valueOf(location);
+        }
+        if (number == null) {
+            throw new Exception(" number is not defined at line " + lexer.getStatus().getLineIndex());
+        }
+        return number;
+    }
+
+
+    protected BigInteger moreFactor(ObjFile obj, BigInteger left) throws Exception {
+        LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+        if (wrapper.getToken().equals(Token.Mul)) {
+            match(Token.Mul);
+            BigInteger right = factor(obj);
+            return moreFactor(obj, left.multiply(right));
+        } else if (wrapper.getToken().equals(Token.Div)) {
+            match(Token.Div);
+            BigInteger right = factor(obj);
+            return moreFactor(obj, left.divide(right));
+        }
+        return left;
     }
 
     public void moreData(ObjFile obj, DataType dataType) throws Exception {
