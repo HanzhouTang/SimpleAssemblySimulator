@@ -1,5 +1,8 @@
 package OutputFile;
 
+/**
+ * The output binary file
+ */
 public class ObjFile {
     DataSegment dataSegment = new DataSegment();
 

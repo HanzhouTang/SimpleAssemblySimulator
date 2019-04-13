@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The data segment
+ * It contains a List&ltByte&rt to represent data.
+ */
 public class DataSegment {
     List<Byte> data = new ArrayList<>();
     Map<String, Integer> nameTable = new HashMap<>();

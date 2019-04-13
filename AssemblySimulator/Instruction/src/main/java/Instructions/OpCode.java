@@ -9,6 +9,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * All Enum types inherit from Op interface.
+ */
 public enum OpCode implements Op {
     ADD("000000"),
     ADC("000001"),

@@ -4,6 +4,9 @@ import org.apache.log4j.Logger;
 
 import java.util.BitSet;
 
+/**
+ * Utils to convert string to/from BitSet.
+ */
 public class BitSetUtils {
     private static final Logger LOGGER = Logger.getLogger(BitSetUtils.class);
 

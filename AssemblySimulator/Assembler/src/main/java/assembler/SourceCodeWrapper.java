@@ -1,5 +1,8 @@
 package assembler;
 
+/**
+ * A wrapper to collect line number and code text together.
+ */
 public class SourceCodeWrapper {
     final private Integer lineNumber;
     final private String code;

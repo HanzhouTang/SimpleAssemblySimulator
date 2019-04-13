@@ -2,6 +2,15 @@ package OutputFile;
 
 import java.util.Optional;
 
+/**
+ * For now, our virtual support 4 data types.
+ * <ul>
+ *     <li>byte(8 bits)</li>
+ *     <li>word(16 bits)</li>
+ *     <li>dword(32 bits)</li>
+ *     <li>qword(512 bits)</li>
+ * </ul>
+ */
 // the smallest unit here is byte, 8 bits = 1 byte
 public enum DataType {
     BYTE(1),

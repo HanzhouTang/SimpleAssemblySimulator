@@ -7,6 +7,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * All registers contain 8 bits data.
+ */
 public enum EightBitsRegister implements Register {
     AL("000"),
     CL("001"),

@@ -94,6 +94,5 @@ public class ParserTest {
         Byte zero = 0;
         Assert.assertEquals(eight,obj.getDataSegment().get(8));
         Assert.assertEquals(zero,obj.getDataSegment().get(9));
-
     }
 }

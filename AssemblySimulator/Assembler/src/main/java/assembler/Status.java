@@ -1,5 +1,17 @@
 package assembler;
 
+/**
+ * The status of lexer.
+ * Basically, the status of lexer should be
+ * <ul>
+ *     <li>a pointer to current line</li>
+ *     <li>a pointer to current character</li>
+ *     <li>current line number in source code</li>
+ *     <li>current token</li>
+ *     <li>current lexeme</li>
+ *     <li>codes of current line</li>
+ * </ul>
+ */
 public class Status {
     Integer iterator = 0;
     Integer lineIndex = 0;

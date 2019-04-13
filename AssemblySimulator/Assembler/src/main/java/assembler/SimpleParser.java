@@ -6,10 +6,17 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.crypto.Data;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
+
+/**
+ * A parser to convert a assembly file into binary file.
+ * For now, the parser will pass code segment twice.
+ * It will collect all label information in the first time.
+ * In the second time, the real parsing is done.
+ * @author Hanzhou Tang
+ */
 
 @Component
 public class SimpleParser {

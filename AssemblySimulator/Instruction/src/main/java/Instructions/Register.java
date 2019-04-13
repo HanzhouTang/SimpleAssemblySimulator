@@ -5,6 +5,9 @@ import common.BitSetUtils;
 import java.util.BitSet;
 import java.util.Optional;
 
+/**
+ * An interface which represent all 8 bits registers, 16 bits registers and 32 bits registers.
+ */
 public interface Register {
     int CODE_SIZE = 3;
 

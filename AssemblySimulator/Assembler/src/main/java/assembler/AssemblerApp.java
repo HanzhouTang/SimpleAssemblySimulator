@@ -2,6 +2,10 @@ package assembler;
 
 import org.apache.commons.io.FilenameUtils;
 
+/**
+ * The entry of the assembler.
+ */
+
 public class AssemblerApp {
     public static void main(String[] args) throws Exception {
         if (args.length == 1) {

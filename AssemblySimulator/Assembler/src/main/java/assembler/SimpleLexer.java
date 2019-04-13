@@ -15,6 +15,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The real implementation of Lexer interface.
+ * The Simple will first strip all comments and then split content into different tokens by delimiters.
+ * @author  Hanzhou Tang
+ */
 @Component
 public class SimpleLexer implements Lexer {
     private static final Logger LOGGER = Logger.getLogger(SimpleLexer.class);

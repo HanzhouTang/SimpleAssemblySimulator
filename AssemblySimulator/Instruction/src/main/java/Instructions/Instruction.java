@@ -1,6 +1,9 @@
 package Instructions;
 
-
+/**
+ * The instruction class.
+ * All source code will convert to consecutive instruction objects.
+ */
 public abstract class Instruction {
     final private Op opcode;
     final private Register register;

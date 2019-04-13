@@ -1,5 +1,8 @@
 package assembler;
 
+/**
+ * A wrapper to combine token and lexeme together.
+ */
 public class LexemeTokenWrapper {
     final Token token;
     final String lexeme;

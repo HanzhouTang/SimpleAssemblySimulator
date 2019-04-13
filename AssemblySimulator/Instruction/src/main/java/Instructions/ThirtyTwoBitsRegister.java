@@ -6,6 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * All registers contain 32 bits data.
+ */
 public enum ThirtyTwoBitsRegister implements Register{
     EAX("000"),
     ECX("001"),
