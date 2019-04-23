@@ -1,13 +1,12 @@
-package OutputFile;
+package Instructions;
 
-import Instructions.Register;
 
 /**
  * Build wrapper for operand.
  *
  * @author Hanzhou Tang
  */
-public class OperandWrapper {
+public class Operand {
     public enum Mode {INDIRECT, SIB, DISPLACEMENT_ONLY, INDIRECT_DISPLACEMENT_FOLLOWED, SIB_DISPLACEMENT_FOLLOWED, REGISTER, IMMEDIATE}
 
     final private Mode mode;
@@ -36,7 +35,7 @@ public class OperandWrapper {
         return scale;
     }
 
-    public OperandWrapper(Builder builder) {
+    public Operand(Builder builder) {
         this.mode = builder.mode;
         this.displacement = builder.displacement;
         this.base = builder.base;
@@ -51,8 +50,8 @@ public class OperandWrapper {
         private int scale = 0;
         private int displacement = 0;
 
-        public OperandWrapper build() {
-            return new OperandWrapper(this);
+        public Operand build() {
+            return new Operand(this);
         }
 
         public Builder immediate(int i) throws Exception {
