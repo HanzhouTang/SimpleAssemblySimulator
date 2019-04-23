@@ -1,12 +1,14 @@
 plugins {
     id 'java'
+    id "maven"
 }
 
+group 'simpleAssembler'
 version '1.0-SNAPSHOT'
-
 sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 

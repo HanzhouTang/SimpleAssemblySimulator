@@ -15,6 +15,7 @@ import java.util.Optional;
  * For now, the parser will pass code segment twice.
  * It will collect all label information in the first time.
  * In the second time, the real parsing is done.
+ *
  * @author Hanzhou Tang
  */
 
@@ -23,23 +24,55 @@ public class SimpleParser {
     @Autowired
     private Lexer lexer;
     private static final Logger LOGGER = Logger.getLogger(SimpleParser.class);
+    private boolean firstPass = true;
+
+    protected void setFirstPass(boolean b) {
+        firstPass = b;
+    }
+
+    public boolean getFirstPass() {
+        return firstPass;
+    }
 
     public Lexer getLexer() {
         return lexer;
     }
 
     public ObjFile parse(String name) throws Exception {
+        setFirstPass(true);
         lexer.readFile(name);
         ObjFile objFile = new ObjFile();
+        parse(objFile);
+        lexer.readFile(name); // reset the lexer.
+        objFile.resetAfterFirstParsingPass();
+        setFirstPass(false); // not the first pass
         parse(objFile);
         return objFile;
     }
 
+
+
     protected void parse(ObjFile obj) throws Exception {
         LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
-        if (wrapper.getToken().equals(Token.DotString) && ".data".equals(wrapper.getLexeme())) {
-            dataSegment(obj);
+        if (wrapper.getToken().equals(Token.EndofContent)){
+            return;
         }
+        else if(wrapper.getToken().equals(Token.NewLine)){
+            match(Token.NewLine);
+        }
+        else if(wrapper.getToken().equals(Token.DotString)){
+            if(".data".equalsIgnoreCase(wrapper.getLexeme())){
+                dataSegment(obj);
+            }
+            else{
+                throw  new UnsupportedOperationException("the "+wrapper.getLexeme()+" segment at line "
+                        +wrapper.getLineIndex()+" is not supported for now.");
+            }
+        }
+        else{
+            throw new Exception("expected segment define at line "+wrapper.getLineIndex()+". However, we got "+wrapper.getLexeme());
+        }
+        parse(obj);
     }
 
     protected void dataName(ObjFile obj) throws Exception {
@@ -55,10 +88,10 @@ public class SimpleParser {
     }
 
     protected void dataDefine(ObjFile obj) throws Exception {
-        LOGGER.info("in data Define");
+        LOGGER.debug("in data Define");
         dataName(obj);
         Token token = lexer.getNextToken();
-        LOGGER.info("in data Define, token " + token);
+        LOGGER.debug("in data Define, token " + token);
         if (token.equals(Token.String)) {
             String lexem = lexer.getStatus().getCurrentLexeme();
             Optional<DataType> dataType = DataType.of(lexem);
@@ -68,7 +101,7 @@ public class SimpleParser {
                 throw new Exception("not find data type define in data segment at line " + lexer.getStatus().getLineIndex());
             }
         }
-        LOGGER.info("exit data define");
+        LOGGER.debug("exit data define");
     }
 
     protected void moreDataDefine(ObjFile obj) throws Exception {
@@ -76,7 +109,7 @@ public class SimpleParser {
         if (wrapper.getToken().equals(Token.EndofContent)) {
             return;
         }
-        LOGGER.info("wrapper token " + wrapper.getToken() + " lexeme (" + wrapper.getLexeme() + ")");
+        LOGGER.debug("wrapper token " + wrapper.getToken() + " lexeme (" + wrapper.getLexeme() + ")");
         if (wrapper.getToken().equals(Token.NewLine)) {
             match(Token.NewLine);
         }
@@ -132,10 +165,10 @@ public class SimpleParser {
             match(Token.String);
             match(Token.Number);
             int times = Integer.valueOf(lexer.getStatus().getCurrentLexeme());
-            LOGGER.info("dup times " + times + " current location " + currentLocation);
+            LOGGER.debug("dup times " + times + " current location " + currentLocation);
             match(Token.LeftParent);
             dataList(obj, dataType);
-            LOGGER.info("after parse data list location " + obj.getDataSegment().getCurrentLocation());
+            LOGGER.debug("after parse data list location " + obj.getDataSegment().getCurrentLocation());
             List<Byte> tmpData = obj.getDataSegment().getPortionFrom(currentLocation);
             for (int i = 1; i < times; i++) {
                 obj.getDataSegment().addData(tmpData);
@@ -197,16 +230,20 @@ public class SimpleParser {
                 match(Token.String);
                 Optional<DataType> type = DataType.of(lexer.getStatus().getCurrentLexeme());
                 if (!type.isPresent()) {
-                    throw new Exception("not find data type define after sizeof operator at line " + lexer.getStatus().getLineIndex());
+                    throw new Exception("not find data type define after sizeof operator at line " + wrapper.getLineIndex());
                 } else {
                     number = BigInteger.valueOf(type.get().getSize());
                 }
             } else {
-                int location = obj.getDataSegment().getLocationByName(str);
-                if (location == -1) {
-                    throw new Exception("not find label " + str + " at line " + lexer.getStatus().getLineIndex());
+                if (firstPass) {
+                    number = BigInteger.valueOf(0);
                 } else {
-                    number = BigInteger.valueOf(location);
+                    int location = obj.getDataSegment().getLocationByName(str);
+                    if (location == -1) {
+                        throw new Exception("not find label " + str + " at line " + wrapper.getLineIndex());
+                    } else {
+                        number = BigInteger.valueOf(location);
+                    }
                 }
             }
         } else if (wrapper.getToken().equals(Token.DollarSign)) {
@@ -215,7 +252,7 @@ public class SimpleParser {
             number = BigInteger.valueOf(location);
         }
         if (number == null) {
-            throw new Exception(" number is not defined at line " + lexer.getStatus().getLineIndex());
+            throw new Exception(" number is not defined at line " + wrapper.getLineIndex());
         }
         return number;
     }

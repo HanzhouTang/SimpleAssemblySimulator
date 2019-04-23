@@ -3,7 +3,7 @@ package OutputFile;
 /**
  * The output binary file
  */
-public class ObjFile {
+public class ObjFile implements SupportTwoParsingPass{
     DataSegment dataSegment = new DataSegment();
 
     public DataSegment getDataSegment() {
@@ -11,5 +11,12 @@ public class ObjFile {
             dataSegment = new DataSegment();
         }
         return dataSegment;
+    }
+
+
+    @Override
+    public void resetAfterFirstParsingPass(){
+        DataSegment dataSegment = getDataSegment();
+        dataSegment.resetAfterFirstParsingPass();
     }
 }

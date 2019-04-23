@@ -6,14 +6,23 @@ package assembler;
 public class LexemeTokenWrapper {
     final Token token;
     final String lexeme;
-    LexemeTokenWrapper(Token t, String s){
+    final int lineIndex;
+
+    LexemeTokenWrapper(Token t, String s, int index) {
         token = t;
         lexeme = s;
+        lineIndex = index;
     }
-    Token getToken(){
+
+    Token getToken() {
         return token;
     }
-    String getLexeme(){
+
+    String getLexeme() {
         return lexeme;
+    }
+
+    int getLineIndex() {
+        return lineIndex;
     }
 }

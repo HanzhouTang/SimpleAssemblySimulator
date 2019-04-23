@@ -107,10 +107,10 @@ public class SimpleLexer implements Lexer {
     private LexemeTokenWrapper getNextLexemeAndToken(){
         Token token = getNextToken();
         if(token.equals(Token.EndofContent)){
-            return new LexemeTokenWrapper(Token.EndofContent,"");
+            return new LexemeTokenWrapper(Token.EndofContent,"",getStatus().getLineIndex());
         }
         else{
-            return new LexemeTokenWrapper(getStatus().getCurrentToken(),getStatus().getCurrentLexeme());
+            return new LexemeTokenWrapper(getStatus().getCurrentToken(),getStatus().getCurrentLexeme(),getStatus().getLineIndex());
         }
 
     }

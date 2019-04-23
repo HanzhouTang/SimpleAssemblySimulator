@@ -11,7 +11,7 @@ import java.util.Map;
  * The data segment
  * It contains a List&ltByte&rt to represent data.
  */
-public class DataSegment {
+public class DataSegment implements  SupportTwoParsingPass {
     List<Byte> data = new ArrayList<>();
     Map<String, Integer> nameTable = new HashMap<>();
 
@@ -76,5 +76,10 @@ public class DataSegment {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void resetAfterFirstParsingPass(){
+        data.clear();
     }
 }
