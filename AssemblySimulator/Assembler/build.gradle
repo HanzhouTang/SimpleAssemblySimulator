@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'maven'
+}
+
+group 'simpleAssembler'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile group: "${group}", name: 'Instruction', version: "${version}", changing: true
+    compile group: 'log4j', name: 'log4j', version: '1.2.16'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.springframework', name: 'spring-core', version: '5.0.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-beans', version: '5.0.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '5.0.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-aop', version: '5.0.2.RELEASE'
+    compile group: 'org.springframework', name: 'spring-test', version: '5.0.2.RELEASE'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'assembler.AssemblerApp'
+        )
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task run(type: JavaExec){
+    classpath sourceSets.main.runtimeClasspath
+    main = 'assembler.App'
+}

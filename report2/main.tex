@@ -1,0 +1,812 @@
+\documentclass[12pt]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+ 
+\lstdefinestyle{mystyle}{
+    frame=tb,
+    language=Java,
+    %backgroundcolor=\color{backcolour},
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{mauve},
+    basicstyle={\small\ttfamily},
+    breakatwhitespace=true,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+\title{Proposal}
+\author{
+Hanzhou Tang \\
+\texttt{hanzhout@smu.edu}
+\and 
+Jiutian Yu \\
+\texttt{jiutiany@smu.com}
+}
+\date{ 2019 April}
+
+\begin{document}
+
+
+\maketitle
+\begin{abstract}
+We want to build an assembly simulator which should support basic x86 assembly instructions.
+\end{abstract}
+\section{Motivation}
+To implement a basic architecture is a direct way to reflect what we are going to learn in this class. We could also say we are going to implement a simple virtual machine. Beyond simply implementing the original architecture, we want to add some new functions based on this class to complete the architecture.  
+\section{Why Java}
+It's tempted to implement an assembly simulator in a low level language like C or C++. However, after some considerations, we decided to choose Java.
+There are several reasons which will be show below. 
+\subsection{Java is easy for memory management}
+With C++11, it has smarter pointers to make life easier \cite{josuttis2012c++}. 
+However, it's implemented in library level instead of language supporting.
+Sometimes, when we mistakenly mixed raw pointers and smart pointers , smart pointers may become useless.
+\subsection{Java is easy to test}
+There are lots of powerful java testing framework to do unit test. For example, JUnit or Groovy Spock. 
+Meanwhile, because Java support proxy object, it's much easy to mock objects and record function invoking.
+\subsection{Java is easy for package manage}
+With the help of gradle \cite{muschko2014gradle}, it's very easy for us to import different libraries and do deployment. We believe it could save us lots of time and efforts.
+\subsection{Java is easy to integrate with REST API}
+If we could finish our project well, we may want to implement an online version for all users. We could easily provide REST API with the help of Spring \cite{walls2005spring}.
+\section{Our registers}
+We do want to implement some basic functionality of x86 platform. So we decide to imitate ten 32 bits registers. A table, which is Table1, of our registers is shown below.
+The table originally comes from \cite{kusswurm2014modern}.
+
+As you can see, we ignore all segment registers. The reason is that according to our design, only one process can run at one time and no context switch.
+We think, in this case, segment information is unnecessary. Maybe we're wrong, we may change our decision later.  
+\section{Our instruction set}
+We want to support a subset of assembly instructions on x86 platform. 
+By doing some researches \cite{kusswurm2014modern}, we provide a table which contains all instructions we want support.
+
+\section{Our progress}
+We finished most of our assembler and instruction set. 
+
+In the assembler, the data segment can support expression, such as (\$ - 10)
+
+We didn't re-invent the instruction set, instead, we follow the Intel standard to represent our instructions. For more detail, you can find at http://www.c-jump.com/CIS77/CPU/x86/lecture.html
+
+The only thing left is to implement the virtual machine which supports our instruction. 
+
+By some discussion, we decide to implement a 5-stage virtual machine to execute our instructions.
+
+We also want to provide the ability to expose our internal status. We may choose to export internal status by html. If we can finish our virtual machine early.
+
+We provide part of our implementation of assembler and instruction.
+
+\bibliography{bibliography.bib}
+\bibliographystyle{acm}
+\bigskip
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{||c | p{9cm}||} 
+     \hline
+     Register & Descriptions \\ [0.5ex] 
+     \hline
+     EAX & Accumulator. 0 to 7 can be refered as AL. 8 to 15 can be refered as AH. 0 to 15 can be refered as AX. \\ 
+     \hline
+     EBX & Memory pointer, base Register. 0 to 7 can be refered as BL. 8 to 15 can be refered as BH. 0 to 15 can be refered as BX. \\
+     \hline
+     ECX & Loop control. 0 to 7 can be refered as CL. 8 to 15 can be refered as CH. 0 to 15 can be refered as CX. \\
+     \hline
+     EDX & Integer multiplication, integer division. 0 to 7 can be refered as DL. 8 to 15 can be refered as DH. 0 to 15 can be refered as DX. \\
+     \hline
+     ESI & String instruction source pointer. \\
+     \hline
+     EDI & String instruction destination pointer. \\
+     \hline
+     ESP & Stack Pointer. \\
+     \hline
+     EBP & Stack frame base Pointer. \\
+     \hline
+     EIP & Instruction pointer register. \\
+     \hline
+     EFLAGS & Flag register. \\
+     \hline
+    \end{tabular}
+    \caption{The registers we want to imitate}
+    \label{table:1}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{||c | p{9cm}||} 
+     \hline
+     mov & Copy data from one place to another place. \\ [0.5ex] 
+     \hline
+     push & Push register, memory location or immediate value onto stack.  \\ 
+     \hline
+     pop & Pop the first item from stack. \\
+     \hline
+     add & Add two number \\
+     \hline
+     sub &  Subtraction \\
+     \hline
+     cbw & Sign-extends register AL. \\
+     \hline
+     cwd & Sign-extends register AX. \\
+     \hline
+     bswap & Reverse the bytes of a 32-bit register. \\
+     \hline
+     and & Logic and. \\
+     \hline
+     or & Logic or. \\
+     \hline
+     xor & Logic xor. \\
+     \hline
+     not & Logic not. \\
+     \hline
+     sal/shl & Left shift. \\
+     \hline
+     sar & Arithmetric right shift. \\
+     \hline
+     shr & Logic right shift. \\
+     \hline
+     cmpsb/cmpsw/cmpsd & Compare the values at location. \\
+     \hline
+     lodsb/lodsw/lodsd & Loads the values at location. \\
+     \hline
+     stosb/stosw/stosd & Save the values at register to memory. \\
+     \hline
+     rep/repne & Repeat a specified instruction by condition \\
+     \hline
+     jmp/jcc/jecxz & Unconditonal/conditional jump \\
+     \hline
+     call & Push content to stack then do unconditonal jump.\\
+     \hline
+     ret & Pop stack then do unconditonal jump.\\
+     \hline
+     enter & Create a stack frame for function.\\
+     \hline
+     leave & Remove a stack frame of function.\\
+     \hline
+     loop/loope/loopz/loopne/loopnz & Loop.\\
+     \hline
+     nop & Advance the instruction pointer.\\
+     \hline
+    \end{tabular}
+    \caption{The instructions we want to imitate}
+    \label{table:2}
+\end{table}
+\pagebreak
+
+\section{Part of our source code}
+\begin{enumerate}
+
+    \item\textbf {Simpler Lexer} \\
+    \begin{lstlisting}
+    package assembler;
+    
+    import org.apache.commons.lang3.StringUtils;
+    import org.apache.commons.lang3.tuple.Pair;
+    import org.apache.log4j.Logger;
+    import org.springframework.stereotype.Component;
+    
+    
+    import java.math.BigInteger;
+    import java.nio.file.Files;
+    import java.nio.file.Paths;
+    import java.util.*;
+    import java.util.concurrent.atomic.AtomicInteger;
+    import java.util.function.Predicate;
+    import java.util.stream.Collectors;
+    import java.util.stream.Stream;
+    
+    /**
+     * The real implementation of Lexer interface.
+     * The Simple will first strip all comments and then split content into different tokens by delimiters.
+     * @author  Hanzhou Tang
+     */
+    @Component
+    public class SimpleLexer implements Lexer {
+        private static final Logger LOGGER = Logger.getLogger(SimpleLexer.class);
+        //private Map<Integer, String> lines = null;
+        private List<SourceCodeWrapper> lines = null;
+        public List<SourceCodeWrapper> getLines() {
+            return lines;
+        }
+    
+        public static Set<Character> delimiters = new HashSet<>();
+        public static Map<String, Token> char2Token = new HashMap<>();
+    
+        static {
+            delimiters.add(' ');
+            delimiters.add('\t');
+            delimiters.add('\n');
+            delimiters.add(',');
+            delimiters.add(':');
+            delimiters.add('+');
+            delimiters.add('-');
+            delimiters.add('*');
+            delimiters.add('/');
+            delimiters.add('[');
+            delimiters.add(']');
+            delimiters.add('(');
+            delimiters.add(')');
+            delimiters.add('$');
+            delimiters.add('\'');
+            char2Token.put(",", Token.Comma);
+            char2Token.put(":", Token.Colon);
+            char2Token.put("+", Token.Add);
+            char2Token.put("-", Token.Sub);
+            char2Token.put("*", Token.Mul);
+            char2Token.put("/", Token.Div);
+            char2Token.put("[", Token.LeftSquareBracket);
+            char2Token.put("]", Token.RightSquareBracket);
+            char2Token.put("\n", Token.NewLine);
+            char2Token.put("(", Token.LeftParent);
+            char2Token.put(")", Token.RightParent);
+            char2Token.put("$", Token.DollarSign);
+            char2Token.put("'",Token.Quote);
+        }
+    
+        Status status = null;
+    
+        @Override
+        public Status getStatus() {
+            return status;
+        }
+    
+        public void setStatus(Status status) {
+            this.status = status;
+        }
+    
+        private Pair<Integer, String> stripComments(final Map.Entry<Integer, String> record) {
+            String retStr = StringUtils.chomp(record.getValue());
+            int index = retStr.indexOf(';');
+            if (index != -1) {
+                retStr = retStr.substring(0, index);
+            }
+            retStr = StringUtils.strip(retStr);
+            if (StringUtils.isNotEmpty(retStr)) {
+                retStr += "\n";
+            }
+            return Pair.of(record.getKey(), retStr);
+        }
+    
+        @Override
+        public void readFile(String filename) throws Exception {
+            AtomicInteger counter = new AtomicInteger();
+            lines = Files.lines(Paths.get(filename))
+                    .collect(Collectors.toMap(s -> counter.incrementAndGet(), s -> s))
+                    .entrySet().stream().map(this::stripComments).filter(x -> StringUtils.isNotEmpty(x.getValue()))
+                    .map(e -> new SourceCodeWrapper(e.getKey(),e.getValue())).collect(Collectors.toList());
+            if(lines.size()>0){
+                status = new Status();
+                status.setCodeOfCurrentLine(lines.get(0).getCode());
+            }
+            else{
+                throw  new Exception("file is empty");
+            }
+        }
+    
+    
+        private LexemeTokenWrapper getNextLexemeAndToken(){
+            Token token = getNextToken();
+            if(token.equals(Token.EndofContent)){
+                return new LexemeTokenWrapper(Token.EndofContent,"");
+            }
+            else{
+                return new LexemeTokenWrapper(getStatus().getCurrentToken(),getStatus().getCurrentLexeme());
+            }
+    
+        }
+    
+        @Override
+        public List<LexemeTokenWrapper> lookAheadK(int k){
+            Status oldStatus = new Status(getStatus());
+            List<LexemeTokenWrapper> ret = Stream.generate(this::getNextLexemeAndToken).limit(k).collect(Collectors.toList());
+            setStatus(oldStatus);
+            return ret;
+        }
+    
+        public static int findStr_if(final String str, final int begin, Predicate<Character> predicate) {
+            int i = begin;
+            for (; i < str.length(); i++) {
+                if (predicate.test(str.charAt(i))) {
+                    return i;
+                }
+            }
+            return i;
+        }
+    
+        @Override
+        public Token getNextToken() {
+            if (status.getIterator()>=lines.size()) {
+                return Token.EndofContent;
+            } else {
+                if (status.getCharIndex() == status.getCodeOfCurrentLine().length()) {
+                    status.setIterator(status.getIterator()+1);
+                    if(status.getIterator()==lines.size()){
+                        return Token.EndofContent;
+                    }
+                    SourceCodeWrapper wrapper = lines.get(status.getIterator());
+                    status.setCharIndex(0);
+                    status.setCodeOfCurrentLine(wrapper.getCode());
+                    status.setLineIndex(wrapper.getLineNumber());
+                    status.setCurrentToken(Token.Invalid);
+                    status.setCurrentLexeme("");
+                }
+                status.setCurrentToken(Token.Invalid);
+                final String str = status.getCodeOfCurrentLine();
+                int i = findStr_if(str, status.getCharIndex(), ch -> ch == '\n' || !Character.isWhitespace(ch));
+                int j = findStr_if(str, i, delimiters::contains);
+                if (i == j) {
+                    status.setCurrentLexeme("" + str.charAt(i));
+                    status.setCharIndex(i + 1);
+                    if (char2Token.containsKey(status.getCurrentLexeme())) {
+                        Token token = char2Token.get(status.getCurrentLexeme());
+                        status.setCurrentToken(token);
+                    } else {
+                        LOGGER.error("the Character (" + status.getCurrentLexeme() + ") " + "at line " + status.getLineIndex() + " is invalid");
+                    }
+                } else {
+                    String lexeme = str.substring(i, j);
+                    status.setCurrentLexeme(lexeme);
+                    status.setCharIndex(j);
+                    if (StringUtils.isNumeric(lexeme)) {
+                        status.setCurrentToken(Token.Number);
+                    } else if (lexeme.startsWith(".")) {
+                        status.setCurrentToken(Token.DotString);
+                    } else {
+                        status.setCurrentToken(Token.String);
+                    }
+                }
+                if (status.getCurrentToken() == Token.Invalid) {
+                    LOGGER.warn("the word (" + status.getCurrentLexeme() + ") at line " + status.getLineIndex() + " is invalid");
+                    //throw new Exception("the word (" + status.getCurrentLexeme() + ") at line " + status.getLineIndex() + " is invalid");
+                }
+                return status.getCurrentToken();
+            }
+        }
+    
+    }
+    \end{lstlisting}
+    
+    \item\textbf {Simple Parser} \\
+    \begin{lstlisting}
+    package assembler;
+    
+    import OutputFile.DataType;
+    import OutputFile.ObjFile;
+    import org.apache.log4j.Logger;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Component;
+    
+    import java.math.BigInteger;
+    import java.util.List;
+    import java.util.Optional;
+    
+    /**
+     * A parser to convert a assembly file into binary file.
+     * For now, the parser will pass code segment twice.
+     * It will collect all label information in the first time.
+     * In the second time, the real parsing is done.
+     * @author Hanzhou Tang
+     */
+    
+    @Component
+    public class SimpleParser {
+        @Autowired
+        private Lexer lexer;
+        private static final Logger LOGGER = Logger.getLogger(SimpleParser.class);
+    
+        public Lexer getLexer() {
+            return lexer;
+        }
+    
+        public ObjFile parse(String name) throws Exception {
+            lexer.readFile(name);
+            ObjFile objFile = new ObjFile();
+            parse(objFile);
+            return objFile;
+        }
+    
+        protected void parse(ObjFile obj) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.DotString) && ".data".equals(wrapper.getLexeme())) {
+                dataSegment(obj);
+            }
+        }
+    
+        protected void dataName(ObjFile obj) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.String)) {
+                Optional<DataType> dataType = DataType.of(wrapper.lexeme);
+                if (!dataType.isPresent()) {
+                    obj.getDataSegment().addNmae(wrapper.getLexeme());
+                    lexer.getNextToken();
+                    dataName(obj);
+                }
+            }
+        }
+    
+        protected void dataDefine(ObjFile obj) throws Exception {
+            LOGGER.info("in data Define");
+            dataName(obj);
+            Token token = lexer.getNextToken();
+            LOGGER.info("in data Define, token " + token);
+            if (token.equals(Token.String)) {
+                String lexem = lexer.getStatus().getCurrentLexeme();
+                Optional<DataType> dataType = DataType.of(lexem);
+                if (dataType.isPresent()) {
+                    dataList(obj, dataType.get());
+                } else {
+                    throw new Exception("not find data type define in data segment at line " + lexer.getStatus().getLineIndex());
+                }
+            }
+            LOGGER.info("exit data define");
+        }
+    
+        protected void moreDataDefine(ObjFile obj) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.EndofContent)) {
+                return;
+            }
+            LOGGER.info("wrapper token " + wrapper.getToken() + " lexeme (" + wrapper.getLexeme() + ")");
+            if (wrapper.getToken().equals(Token.NewLine)) {
+                match(Token.NewLine);
+            }
+            wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken() != Token.DotString) {
+                dataDefine(obj);
+                moreDataDefine(obj);
+            }
+        }
+    
+        protected void dataList(ObjFile obj, DataType dataType) throws Exception {
+            data(obj, dataType);
+            moreData(obj, dataType);
+    
+        }
+    
+        protected void match(String str) throws Exception {
+            lexer.getNextToken();
+            if (!str.equals(lexer.getStatus().getCurrentLexeme())) {
+                throw new Exception("Expected " + str + " at line " + lexer.getStatus().getLineIndex() +
+                        ". However, we got " + lexer.getStatus().getCurrentLexeme());
+            }
+        }
+    
+        protected void match(Token t) throws Exception {
+            Token token = lexer.getNextToken();
+            if (!t.equals(token)) {
+                throw new Exception("Expected token " + t + " at line " + lexer.getStatus().getLineIndex() +
+                        ". However, we got " + token);
+            }
+        }
+    
+        /**
+         * For now, only supports 3 kinds of data.
+         * They are string, like '1dfdssasad'.
+         * Number, like 123.
+         * And dup, like dup 10 (123).
+         * We should support $ and basic arithmetic operations here later.
+         *
+         * @param obj      the return object file
+         * @param dataType see Enum dataType
+         * @throws Exception exception
+         */
+        protected void data(ObjFile obj, DataType dataType) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.Quote)) {
+                match(Token.Quote);
+                match(Token.String);
+                obj.getDataSegment().addData(lexer.getStatus().currentLexeme, dataType);
+                match(Token.Quote);
+            } else if (wrapper.getToken().equals(Token.String) && "dup".equals(wrapper.getLexeme())) {
+                int currentLocation = obj.getDataSegment().getCurrentLocation();
+                match(Token.String);
+                match(Token.Number);
+                int times = Integer.valueOf(lexer.getStatus().getCurrentLexeme());
+                LOGGER.info("dup times " + times + " current location " + currentLocation);
+                match(Token.LeftParent);
+                dataList(obj, dataType);
+                LOGGER.info("after parse data list location " + obj.getDataSegment().getCurrentLocation());
+                List<Byte> tmpData = obj.getDataSegment().getPortionFrom(currentLocation);
+                for (int i = 1; i < times; i++) {
+                    obj.getDataSegment().addData(tmpData);
+                }
+                match(Token.RightParent);
+            } else {
+                BigInteger number = expr(obj);
+                obj.getDataSegment().addData(number, dataType);
+            }
+        }
+    
+    
+        protected BigInteger expr(ObjFile obj) throws Exception {
+            BigInteger term = term(obj);
+            return moreTerm(obj, term);
+        }
+    
+        protected BigInteger term(ObjFile obj) throws Exception {
+            BigInteger factor = factor(obj);
+            return moreFactor(obj, factor);
+        }
+    
+        //negative is not very good here
+        protected BigInteger moreTerm(ObjFile obj, BigInteger left) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.Add)) {
+                match(Token.Add);
+                BigInteger right = term(obj);
+                return moreFactor(obj, left.add(right));
+            } else if (wrapper.getToken().equals(Token.Sub)) {
+                match(Token.Sub);
+                BigInteger right = term(obj);
+                return moreFactor(obj, left.subtract(right));
+            }
+            return left;
+        }
+    
+    
+        protected BigInteger factor(ObjFile obj) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            BigInteger number = null;
+            if (wrapper.getToken().equals(Token.Sub)) {
+                match(Token.Sub);
+                return factor(obj).negate();
+            } else if (wrapper.getToken().equals(Token.LeftParent)) {
+                match(Token.LeftParent);
+                number = expr(obj);
+                match(Token.RightParent);
+                return number;
+            }
+            wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.Number)) {
+                match(Token.Number);
+                number = new BigInteger(lexer.getStatus().currentLexeme);
+            } else if (wrapper.getToken().equals(Token.String)) {
+                match(Token.String);
+                final String str = lexer.getStatus().getCurrentLexeme();
+                if ("sizeof".equals(str)) {
+                    match(Token.String);
+                    Optional<DataType> type = DataType.of(lexer.getStatus().getCurrentLexeme());
+                    if (!type.isPresent()) {
+                        throw new Exception("not find data type define after sizeof operator at line " + lexer.getStatus().getLineIndex());
+                    } else {
+                        number = BigInteger.valueOf(type.get().getSize());
+                    }
+                } else {
+                    int location = obj.getDataSegment().getLocationByName(str);
+                    if (location == -1) {
+                        throw new Exception("not find label " + str + " at line " + lexer.getStatus().getLineIndex());
+                    } else {
+                        number = BigInteger.valueOf(location);
+                    }
+                }
+            } else if (wrapper.getToken().equals(Token.DollarSign)) {
+                match(Token.DollarSign);
+                int location = obj.getDataSegment().getCurrentLocation();
+                number = BigInteger.valueOf(location);
+            }
+            if (number == null) {
+                throw new Exception(" number is not defined at line " + lexer.getStatus().getLineIndex());
+            }
+            return number;
+        }
+    
+    
+        protected BigInteger moreFactor(ObjFile obj, BigInteger left) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.Mul)) {
+                match(Token.Mul);
+                BigInteger right = factor(obj);
+                return moreFactor(obj, left.multiply(right));
+            } else if (wrapper.getToken().equals(Token.Div)) {
+                match(Token.Div);
+                BigInteger right = factor(obj);
+                return moreFactor(obj, left.divide(right));
+            }
+            return left;
+        }
+    
+        public void moreData(ObjFile obj, DataType dataType) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.getToken().equals(Token.Comma)) {
+                match(Token.Comma);
+                data(obj, dataType);
+                moreData(obj, dataType);
+            }
+        }
+    
+    
+        protected void dataSegment(ObjFile obj) throws Exception {
+            LexemeTokenWrapper wrapper = lexer.lookAheadK(1).get(0);
+            if (wrapper.token.equals(Token.DotString) && ".data".equals(wrapper.getLexeme())) {
+                lexer.getNextToken();
+            }
+            moreDataDefine(obj);
+        }
+    }
+    \end{lstlisting}
+    
+    \item\textbf {Eight-Bit Register} \\
+    \begin{lstlisting}
+    
+    package Instructions;
+    
+    import javax.swing.text.html.Option;
+    import java.util.Map;
+    import java.util.Optional;
+    import java.util.function.Function;
+    import java.util.stream.Collectors;
+    import java.util.stream.Stream;
+    
+    /**
+     * All registers contain 8 bits data.
+     */
+    public enum EightBitsRegister implements Register {
+        AL("000"),
+        CL("001"),
+        DL("010"),
+        BL("011"),
+        AH("100"),
+        CH("101"),
+        DH("110"),
+        BH("111");
+        private final String registerCode;
+    
+        EightBitsRegister(String code) {
+            registerCode = code;
+        }
+    
+        @Override
+        public RegisterLength getRegisterLength() {
+            return RegisterLength.EIGHT;
+        }
+    
+        @Override
+        public String getRegisterName() {
+            return name().toLowerCase();
+        }
+    
+        @Override
+        public String getRegisterCode() {
+            return registerCode;
+        }
+    
+        private static Map<String, Register> codeToRegister =
+                Stream.of(values()).collect(Collectors.toMap(Register::getRegisterCode, Function.identity()));
+    
+        public static Optional<Register> of(String registerCode) {
+            return Optional.ofNullable(codeToRegister.get(registerCode));
+        }
+    
+        private static Map<String, Register> nameToRegister =
+                Stream.of(values()).collect(Collectors.toMap(Register::getRegisterName, Function.identity()));
+    
+        public static Optional<Register> fromName(String name) {
+            return Optional.ofNullable(nameToRegister.get(name.toLowerCase()));
+        }
+    }
+    \end{lstlisting}
+    \item\textbf {Operation Code} \\
+    \begin{lstlisting}
+    package Instructions;
+    
+    import common.BitSetUtils;
+    
+    import java.util.BitSet;
+    import java.util.Map;
+    import java.util.Optional;
+    import java.util.function.Function;
+    import java.util.stream.Collectors;
+    import java.util.stream.Stream;
+    
+    /**
+     * All Enum types inherit from Op interface.
+     */
+    public enum OpCode implements Op {
+        ADD("000000"),
+        ADC("000001"),
+        SUB("000010"),
+        SBB("000011"),
+        MUL("000100"),
+        DIV("000101"),
+        MOV("000110"),
+        PUSH("000111"),
+        POP("001000"),
+        CBW("001001"),
+        CWD("001010"),
+        BSWAP("001011"),
+        AND("001100"),
+        OR("001101"),
+        XOR("001110"),
+        NOT("001111"),
+        SAL("010000"),
+        SHL("010001"),
+        SAR("010010"),
+        SHR("010011"),
+        CMPSB("010100"),
+        CMPSW("010101"),
+        CMPSD("010110"),
+        LODSB("010111"),
+        LODSW("011000"),
+        LODSD("011001"),
+        STOSB("011010"),
+        STOSW("011011"),
+        STOSD("011100"),
+        REP("011101"),
+        REPNE("011110"),
+        JMP("011111"),
+        JCC("100000"),
+        JECXZ("100001"),
+        CALL("100010"),
+        RET("100011"),
+        ENTER("100100"),
+        LEAVE("100101"),
+        LOOP("100110"),
+        LOOPE("100111"),
+        LOOPZ("101000"),
+        LOOPNE("101001"),
+        LOOPNZ("101010"),
+        NOP("101011");
+        private final String opcode;
+    
+        OpCode( String bits) {
+            assert bits.length() == Op.SIZE;
+            opcode = bits;
+        }
+    
+        @Override
+        public String getMemonic() {
+            return name();
+        }
+    
+        @Override
+        public BitSet getBits() {
+            BitSet bitSet = null;
+            try{
+                bitSet = BitSetUtils.fromString(opcode);
+            }
+            catch (Exception e){
+                getOpLogger().info("catch exception " + e);
+            }
+            return bitSet;
+        }
+    
+        @Override
+        public  String getOpCode(){
+            return opcode;
+        }
+    
+        public static Optional<Op> of(final String opcode) {
+            return Optional.ofNullable(bitsToOpCode.get(opcode));
+        }
+    
+        private static final Map<String, Op> memToOpCode = Stream.of(OpCode.values())
+                .collect(Collectors.toMap(Object::toString, Function.identity()));
+    
+        private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
+                .collect(Collectors.toMap(Op::getOpCode, Function.identity()));
+    
+        public static Optional<Op> fromMem(final String mem) {
+            return Optional.ofNullable(memToOpCode.get(mem.toUpperCase()));
+        }
+    }
+    \end{lstlisting}
+    \end{enumerate}
+    
+
+
+\end{document}
