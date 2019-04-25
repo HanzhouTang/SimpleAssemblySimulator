@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 /**
  * All registers contain 16 bits data.
  */
-public enum SixteenBitsRegister  implements  Register{
+public enum SixteenBitsRegister  implements Register{
     AX("000"),
     CX("001"),
     DX("010"),

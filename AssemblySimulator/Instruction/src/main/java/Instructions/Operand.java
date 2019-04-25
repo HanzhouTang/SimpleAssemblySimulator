@@ -1,13 +1,14 @@
 package Instructions;
 
 
+import javax.naming.OperationNotSupportedException;
+
 /**
  * Build wrapper for operand.
  *
  * @author Hanzhou Tang
  */
 public class Operand {
-    public enum Mode {INDIRECT, SIB, DISPLACEMENT_ONLY, INDIRECT_DISPLACEMENT_FOLLOWED, SIB_DISPLACEMENT_FOLLOWED, REGISTER, IMMEDIATE}
 
     final private Mode mode;
     final private int displacement;
@@ -33,6 +34,13 @@ public class Operand {
 
     public int getScale() {
         return scale;
+    }
+
+    public Register getRegister() throws Exception{
+        if(Mode.REGISTER.equals(mode)){
+            return base;
+        }
+        throw new OperationNotSupportedException();
     }
 
     public Operand(Builder builder) {

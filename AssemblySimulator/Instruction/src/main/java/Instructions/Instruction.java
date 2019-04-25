@@ -4,43 +4,70 @@ package Instructions;
  * The instruction class.
  * All source code will convert to consecutive instruction objects.
  */
-public abstract class Instruction {
+public class Instruction {
     final private Op opcode;
-    final private Register register;
-    final private Register reg_mem;
-    final private boolean memoryToRegister;
-    final private boolean notEightBitsRegister;
-    protected Instruction(Op op, Register _register, Register _reg_mem,boolean d, boolean s){
-        this.opcode = op;
-        register = _register;
-        reg_mem = _reg_mem;
-        memoryToRegister = d;
-        notEightBitsRegister = s;
+    final private Operand register;
+    final private Operand memRegister;
+    final private boolean isFromMemToReg;
+    final private boolean isEightBitsRegister;
+
+    public boolean isEightBitsRegister() {
+        return isEightBitsRegister;
     }
-    protected  Op getOpcode(){
+
+    public boolean isFromMemToReg() {
+        return isFromMemToReg;
+    }
+
+    public Operand getMemRegister() {
+        return memRegister;
+    }
+
+    public Op getOpcode() {
         return opcode;
     }
-    protected Register getFrom(){
-        if(memoryToRegister){
-            return reg_mem;
+
+    public Operand getRegister() {
+        return register;
+    }
+
+    public Instruction(Op op, Operand from, Operand to) throws Exception {
+        opcode = op;
+        if (Mode.REGISTER.equals(from.getMode())) {
+            isFromMemToReg = false;
+            register = from;
+            memRegister = to;
+        } else if (Mode.REGISTER.equals(to.getMode())) {
+            isFromMemToReg = true;
+            register = to;
+            memRegister = from;
+        } else {
+            throw new Exception("there must be at least one register operand in from and to");
         }
-        else{
-            return  register;
+        if (RegisterLength.EIGHT.equals(register.getRegister().getRegisterLength())) {
+            isEightBitsRegister = true;
+        } else {
+            isEightBitsRegister = false;
         }
     }
-    protected Register getTo(){
-        if(memoryToRegister){
+
+    public Operand getFrom() {
+        if (isFromMemToReg) {
+            return memRegister;
+        } else {
             return register;
         }
-        else{
-            return reg_mem;
+    }
+
+    public Operand getTo() {
+        if (isFromMemToReg) {
+            return register;
+        } else {
+            return memRegister;
         }
     }
-    protected  Boolean isMemoryToRegister(){
-        return memoryToRegister;
+
+    public byte[] toBytes() {
+        throw new UnsupportedOperationException();
     }
-    protected Boolean isEightBitsRegister(){
-        return !notEightBitsRegister;
-    }
-    public abstract byte[]  toBytes();
 }

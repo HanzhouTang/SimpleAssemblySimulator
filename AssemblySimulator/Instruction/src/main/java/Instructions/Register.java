@@ -13,6 +13,7 @@ public interface Register {
 
     RegisterLength getRegisterLength();
 
+
     String getRegisterName();
 
     String getRegisterCode();
