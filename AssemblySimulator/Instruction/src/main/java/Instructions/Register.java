@@ -18,7 +18,7 @@ public interface Register {
 
     String getRegisterCode();
 
-    default BitSet getReigisterCodeBits(){
+    default BitSet getReigisterCodeBits() throws Exception{
         return BitSetUtils.fromString(getRegisterCode());
     }
 

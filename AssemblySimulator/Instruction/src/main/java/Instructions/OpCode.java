@@ -33,33 +33,33 @@ public enum OpCode implements Op {
     SHL("010001"),
     SAR("010010"),
     SHR("010011"),
-    CMPSB("010100"),
-    CMPSW("010101"),
-    CMPSD("010110"),
-    LODSB("010111"),
-    LODSW("011000"),
-    LODSD("011001"),
-    STOSB("011010"),
-    STOSW("011011"),
-    STOSD("011100"),
-    REP("011101"),
-    REPNE("011110"),
-    JMP("011111"),
-    JCC("100000"),
-    JECXZ("100001"),
-    CALL("100010"),
-    RET("100011"),
-    ENTER("100100"),
-    LEAVE("100101"),
-    LOOP("100110"),
-    LOOPE("100111"),
-    LOOPZ("101000"),
-    LOOPNE("101001"),
-    LOOPNZ("101010"),
-    NOP("101011");
+    CMPSB("010100"), // the opcode of CMPSB, CMPSW and CMPSD are same. Because the length of register will distinguish them.
+    CMPSW("010100"),
+    CMPSD("010100"),
+    LODSB("010101"), // the opcode of LODSB, LODSW and LODSD are same. Because the length of register will distinguish them.
+    LODSW("010101"),
+    LODSD("010101"),
+    STOSB("010110"), // the opcode of STOSB, STOSW and STOSD are same. Because the length of register will distinguish them.
+    STOSW("010110"),
+    STOSD("010110"),
+    REP("010111"),
+    REPNE("011000"),
+    JMP("011001"),
+    JCC("011010"),
+    JECXZ("011011"),
+    CALL("011100"),
+    RET("011101"),
+    ENTER("011110"),
+    LEAVE("011111"),
+    LOOP("100000"),
+    LOOPE("100001"),
+    LOOPZ("100010"),
+    LOOPNE("100011"),
+    LOOPNZ("100100"),
+    NOP("100101");
     private final String opcode;
 
-    OpCode( String bits) {
+    OpCode(String bits) {
         assert bits.length() == Op.SIZE;
         opcode = bits;
     }
@@ -72,17 +72,16 @@ public enum OpCode implements Op {
     @Override
     public BitSet getBits() {
         BitSet bitSet = null;
-        try{
+        try {
             bitSet = BitSetUtils.fromString(opcode);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             getOpLogger().info("catch exception " + e);
         }
         return bitSet;
     }
 
     @Override
-    public  String getOpCode(){
+    public String getOpCode() {
         return opcode;
     }
 
@@ -90,11 +89,40 @@ public enum OpCode implements Op {
         return Optional.ofNullable(bitsToOpCode.get(opcode));
     }
 
+    public static Optional<Op> of(final String opcode, final RegisterLength length) {
+        if (RegisterLength.SIXTEEN.equals(length)) {
+            if ("010100".equals(opcode)) {
+                return Optional.of(CMPSW);
+            } else if ("010101".equals(opcode)) {
+                return Optional.of(LODSW);
+            } else if ("010110".equals(opcode)) {
+                return Optional.of(STOSW);
+            }
+        } else if (RegisterLength.THIRY_TWO.equals(length)) {
+            if ("010100".equals(opcode)) {
+                return Optional.of(CMPSD);
+            } else if ("010101".equals(opcode)) {
+                return Optional.of(LODSD);
+            } else if ("010110".equals(opcode)) {
+                return Optional.of(STOSD);
+            }
+        } else {
+            if ("010100".equals(opcode)) {
+                return Optional.of(CMPSB);
+            } else if ("010101".equals(opcode)) {
+                return Optional.of(LODSB);
+            } else if ("010110".equals(opcode)) {
+                return Optional.of(STOSB);
+            }
+        }
+        return Optional.ofNullable(bitsToOpCode.get(opcode));
+    }
+
     private static final Map<String, Op> memToOpCode = Stream.of(OpCode.values())
             .collect(Collectors.toMap(Object::toString, Function.identity()));
 
     private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
-            .collect(Collectors.toMap(Op::getOpCode, Function.identity()));
+            .collect(Collectors.toMap(Op::getOpCode, Function.identity(),(op1,op2)->op2));
 
     public static Optional<Op> fromMem(final String mem) {
         return Optional.ofNullable(memToOpCode.get(mem.toUpperCase()));

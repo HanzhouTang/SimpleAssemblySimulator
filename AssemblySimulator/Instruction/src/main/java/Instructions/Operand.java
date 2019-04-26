@@ -36,8 +36,12 @@ public class Operand {
         return scale;
     }
 
-    public Register getRegister() throws Exception{
-        if(Mode.REGISTER.equals(mode)){
+    public int getImmediate() {
+        return displacement;
+    }
+
+    public Register getRegister() throws Exception {
+        if (Mode.REGISTER.equals(mode) || Mode.INDIRECT.equals(mode)||Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(mode)) {
             return base;
         }
         throw new OperationNotSupportedException();
