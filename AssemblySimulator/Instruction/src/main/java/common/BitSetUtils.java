@@ -33,15 +33,18 @@ public class BitSetUtils {
         if (bitSet.isEmpty()) {
             return "";
         } else {
-
             StringBuilder builder = new StringBuilder();
             byte[] result = bitSet.toByteArray();
             for (int i = result.length - 1; i >= 0; i--) {
                 builder.append(Integer.toBinaryString((result[i] & 0xFF) + 0x100).substring(1));
             }
-            return builder.toString();
+            return StringUtils.stripStart(builder.toString(),"0");
         }
 
+    }
+
+    public static String toString(byte x){
+        return Integer.toBinaryString((x& 0xFF) + 0x100).substring(1);
     }
 
     public static byte fromBinaryStringToByte(final String str) throws Exception {
@@ -85,6 +88,7 @@ public class BitSetUtils {
             return stringBuilder.toString();
         } else {
             final String value = toString(bitSet);
+            LOGGER.debug("convert value " +value);
             if (value.length() == size) {
                 return value;
             } else if (value.length() < size) {
@@ -96,7 +100,7 @@ public class BitSetUtils {
                 return stringBuilder.toString();
 
             } else {
-                throw new Exception("the size " + size + "is too small for converting");
+                throw new Exception("the size " + size + " is too small for converting");
             }
         }
     }

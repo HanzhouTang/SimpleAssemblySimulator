@@ -70,20 +70,27 @@ public class Operand {
             if (mode != null && !Mode.IMMEDIATE.equals(mode)) {
                 throw new Exception("Immediate mode cannot be together with " + mode.name());
             }
+            mode = Mode.IMMEDIATE;
             displacement = i;
             return this;
         }
 
-        public Builder sib(Register b, Register i, int s) throws Exception {
-            if (mode != null && !Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) && !Mode.SIB.equals(mode)) {
+        public Builder sib(Register base, Register index, int scale) throws Exception {
+            if (mode != null && !Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) && !Mode.SIB.equals(mode)&&!Mode.DISPLACEMENT_ONLY.equals(mode)) {
                 throw new Exception("SIB mode cannot be together with {} " + mode.name());
             }
-            base = b;
-            index = i;
-            if (s != 1 && s != 2 && s != 4 && s != 8) {
+            if(Mode.DISPLACEMENT_ONLY.equals(mode)){
+                mode = Mode.SIB_DISPLACEMENT_FOLLOWED;
+            }
+            else {
+                mode = Mode.SIB;
+            }
+            this.base = base;
+            this.index = index;
+            if (scale != 1 && scale != 2 && scale != 4 && scale != 8) {
                 throw new Exception("scale must be 1, 2, 4 or 8");
             }
-            scale = s;
+            this.scale = scale;
             return this;
         }
 

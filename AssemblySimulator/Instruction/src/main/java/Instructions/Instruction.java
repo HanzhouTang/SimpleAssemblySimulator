@@ -2,10 +2,12 @@ package Instructions;
 
 import common.BitSetUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.log4j.Logger;
 
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -57,7 +59,12 @@ public class Instruction {
 
     public Instruction(Op op, Operand destination, Operand source) throws Exception {
         opcode = op;
-        if (Mode.REGISTER.equals(source.getMode())) {
+        if (Mode.IMMEDIATE.equals(source.getMode())) {
+            LOGGER.debug("immediate source");
+            isFromMemToReg = false;
+            register = source;
+            memRegister = destination;
+        } else if (Mode.REGISTER.equals(source.getMode())) {
             isFromMemToReg = false;
             register = source;
             memRegister = destination;
@@ -66,13 +73,7 @@ public class Instruction {
             register = destination;
             memRegister = source;
         } else {
-            if (Mode.IMMEDIATE.equals(source.getMode())) {
-                isFromMemToReg = false;
-                register = source;
-                memRegister = destination;
-            } else {
-                throw new Exception("there must be at least one register operand in source or destination. Or there is a immediate number in source");
-            }
+            throw new Exception("there must be at least one register operand in source or destination. Or there is a immediate number in source");
         }
         if (Mode.IMMEDIATE.equals(register.getMode())) {
             if (Mode.REGISTER.equals(memRegister.getMode())) {
@@ -114,7 +115,12 @@ public class Instruction {
                 isEightBitsRegister = false;
             }
         }
-
+        if(Mode.REGISTER.equals(register.getMode())&&Mode.REGISTER.equals(memRegister.getMode())){
+            if(!register.getRegister().getRegisterLength().equals(memRegister.getRegister().getRegisterLength())){
+                throw new Exception("the dest "+getDestination().getRegister()+
+                        " register and source register "+getSource().getRegister()+" must have the same length");
+            }
+        }
 
     }
 
@@ -162,12 +168,15 @@ public class Instruction {
         }
         boolean isSIB = false;
         boolean isDisplacement = false;
+        LOGGER.debug("mode " + mode.name());
         switch (mode) {
             case REGISTER:
                 builder.append("11");
                 break;
             case DISPLACEMENT_ONLY:
                 builder.append("00");
+                oneByteDisplacement = false;
+                //for displacement only mode. Always follow a 4 byte displacement.
                 isDisplacement = true;
                 break;
             case INDIRECT:
@@ -183,7 +192,9 @@ public class Instruction {
             case SIB_DISPLACEMENT_FOLLOWED:
                 isSIB = true;
                 isDisplacement = true;
-                if (oneByteDisplacement) {
+                if (memRegister.getBase() == null) {
+                    builder.append("00");
+                } else if (oneByteDisplacement) {
                     builder.append("01");
                 } else {
                     builder.append("10");
@@ -226,7 +237,12 @@ public class Instruction {
                     break;
             }
             builder.append(memRegister.getIndex().getRegisterCode());
-            builder.append(memRegister.getBase().getRegisterCode());
+            if (memRegister.getBase() == null) {
+                builder.append("101");
+            } else {
+                builder.append(memRegister.getBase().getRegisterCode());
+            }
+
         }
         if (isDisplacement) {
             String displacement = Integer.toBinaryString(memRegister.getDisplacement());
@@ -239,6 +255,7 @@ public class Instruction {
                     builder.append('0');
                 }
             }
+            LOGGER.debug("displacement " + displacement);
             builder.append(displacement);
         }
         if (isImmediate) {
@@ -271,10 +288,57 @@ public class Instruction {
         final String instructionStr = builder.toString();
         assert instructionStr.length() % 8 == 0;
         return BitSetUtils.fromBinaryStringToByteArray(instructionStr);
-        /*BitSet bitSet = BitSetUtils.fromString(builder.toString());
-        byte[] result = bitSet.toByteArray();
-        ArrayUtils.reverse(result);
-        */
-        //return result;
+    }
+
+    private static String readAndIncreaseAddress(byte[] bytes, MutableInt currentLocation) throws Exception{
+        int location = currentLocation.getValue();
+        if(location >= bytes.length){
+            throw new Exception("the currentLocation "+ currentLocation +" is out bounded");
+        }
+        currentLocation.add(1);
+        return BitSetUtils.toString(bytes[location]);
+    }
+
+    public static Instruction fromBytes(byte[] bytes, MutableInt currentLocation) throws Exception{
+        String value = readAndIncreaseAddress(bytes,currentLocation);
+        boolean isSixTeenRegister = false;
+        boolean isImmediate = false;
+        if("11111111".equals(value)){
+            isSixTeenRegister = true;
+            value = readAndIncreaseAddress(bytes,currentLocation);
+        }
+        String opCode = value.substring(0,6);
+        Optional<Op> op= OpCode.of(opCode);
+        if(!op.isPresent()){
+            if(opCode.charAt(0)=='1'){
+                opCode = "0" + opCode.substring(1);
+                op = OpCode.of(opCode);
+            }
+            if(!op.isPresent()){
+                throw new Exception("the opcode "+opCode+" is not valid");
+            }
+        }
+        boolean isFromMemToReg = false;
+        if(value.charAt(6)=='1'){
+            isFromMemToReg = true;
+        }
+        boolean isEightBitsRegister = false;
+        if(value.charAt(7)=='0'){
+            isEightBitsRegister = true;
+            if(isSixTeenRegister){
+                throw new Exception("16 bits prefix follows a eight bit instruction");
+            }
+        }
+        value = readAndIncreaseAddress(bytes,currentLocation);
+        Mode mode = null;
+        boolean isDisplacement = false;
+        boolean isOneByteDisplacement = false;
+        if("01".equals(value.substring(0,2))||"10".equals(value.substring(0,2))){
+            isDisplacement = true;
+            if("01".equals(value.substring(0,2))){
+                isOneByteDisplacement = true;
+            }
+        }
+        return null;
     }
 }
