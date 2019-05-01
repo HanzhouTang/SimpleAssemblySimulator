@@ -3,4 +3,4 @@ http://www.skyfree.org/linux/references/ELF_Format.pdf
 https://wiki.osdev.org/ELF
 https://www.tutorialspoint.com/assembly_programming/assembly_introduction.htm
 https://stackoverflow.com/questions/40822714/assembly-segment-declaration-syntax
-This is a new reference
+http://ref.x86asm.net/coder32.html

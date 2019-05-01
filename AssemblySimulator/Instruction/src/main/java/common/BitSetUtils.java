@@ -38,13 +38,57 @@ public class BitSetUtils {
             for (int i = result.length - 1; i >= 0; i--) {
                 builder.append(Integer.toBinaryString((result[i] & 0xFF) + 0x100).substring(1));
             }
-            return StringUtils.stripStart(builder.toString(),"0");
+            return builder.toString();
         }
-
     }
+
+    /**
+     * Though Java doesn't provide a method for parse 2's complement.
+     * It very easy to implement it.
+     * @see https://stackoverflow.com/questions/37058582/how-to-convert-twos-complement-binary-string-to-negative-decimal-number
+     * @param binaryInt a binary string
+     * @return int value
+     */
+    public static int getTwosComplement(String binaryInt) {
+        //Check if the number is negative.
+        //We know it's negative if it starts with a 1
+        if (binaryInt.charAt(0) == '1') {
+            //Call our invert digits method
+            String invertedInt = invertDigits(binaryInt);
+            LOGGER.debug(invertedInt);
+            //Change this to decimal format.
+            long decimalValue = Long.parseLong(invertedInt, 2);
+            //Add 1 to the curernt decimal and multiply it by -1
+            //because we know it's a negative number
+            decimalValue = (decimalValue + 1) * -1;
+            //return the final result
+            return (int)decimalValue;
+        } else {
+            //Else we know it's a positive number, so just convert
+            //the number to decimal base.
+            return Integer.parseInt(binaryInt, 2);
+        }
+    }
+
+    private static String invertDigits(String binaryInt) {
+        String result = binaryInt;
+        result = result.replace("0", " "); //temp replace 0s
+        result = result.replace("1", "0"); //replace 1s with 0s
+        result = result.replace(" ", "1"); //put the 1s back in
+        return result;
+    }
+
 
     public static String toString(byte x){
         return Integer.toBinaryString((x& 0xFF) + 0x100).substring(1);
+    }
+
+    public static String toString(byte[] bytes){
+        StringBuilder builder = new StringBuilder();
+        for(byte x : bytes){
+            builder.append(Integer.toBinaryString((x& 0xFF) + 0x100).substring(1));
+        }
+        return builder.toString();
     }
 
     public static byte fromBinaryStringToByte(final String str) throws Exception {
@@ -92,9 +136,11 @@ public class BitSetUtils {
             if (value.length() == size) {
                 return value;
             } else if (value.length() < size) {
+                char filling = value.charAt(0);
+                // logic extend
                 StringBuilder stringBuilder = new StringBuilder(value);
                 for (int i = 0; i < size - value.length(); i++) {
-                    stringBuilder.insert(0, '0');
+                    stringBuilder.insert(0, filling);
                 }
                 LOGGER.debug("return " + stringBuilder.toString());
                 return stringBuilder.toString();

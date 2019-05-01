@@ -15,7 +15,7 @@ import java.util.Set;
  * All source code will convert to consecutive instruction objects.
  */
 public class Instruction {
-    Logger LOGGER = Logger.getLogger(Instruction.class);
+    private static Logger LOGGER = Logger.getLogger(Instruction.class);
     final private Op opcode;
     final private Operand register;
     final private Operand memRegister;
@@ -23,7 +23,7 @@ public class Instruction {
     final private boolean isEightBitsRegister;
     final private boolean isSixteenBitsRegister;
 
-    static Set<String> givenLengthOp = new HashSet<>();
+    private static Set<String> givenLengthOp = new HashSet<>();
 
     static {
         givenLengthOp.add("CMPSB");
@@ -115,10 +115,10 @@ public class Instruction {
                 isEightBitsRegister = false;
             }
         }
-        if(Mode.REGISTER.equals(register.getMode())&&Mode.REGISTER.equals(memRegister.getMode())){
-            if(!register.getRegister().getRegisterLength().equals(memRegister.getRegister().getRegisterLength())){
-                throw new Exception("the dest "+getDestination().getRegister()+
-                        " register and source register "+getSource().getRegister()+" must have the same length");
+        if (Mode.REGISTER.equals(register.getMode()) && Mode.REGISTER.equals(memRegister.getMode())) {
+            if (!register.getRegister().getRegisterLength().equals(memRegister.getRegister().getRegisterLength())) {
+                throw new Exception("the dest " + getDestination().getRegister() +
+                        " register and source register " + getSource().getRegister() + " must have the same length");
             }
         }
 
@@ -192,9 +192,7 @@ public class Instruction {
             case SIB_DISPLACEMENT_FOLLOWED:
                 isSIB = true;
                 isDisplacement = true;
-                if (memRegister.getBase() == null) {
-                    builder.append("00");
-                } else if (oneByteDisplacement) {
+                if (oneByteDisplacement) {
                     builder.append("01");
                 } else {
                     builder.append("10");
@@ -245,14 +243,25 @@ public class Instruction {
 
         }
         if (isDisplacement) {
-            String displacement = Integer.toBinaryString(memRegister.getDisplacement());
+            LOGGER.debug("one byte displacement " + oneByteDisplacement);
+
+            final String displacement;
+            if (oneByteDisplacement) {
+                displacement = BitSetUtils.toString((byte) memRegister.getDisplacement());
+            } else {
+                displacement = Integer.toBinaryString(memRegister.getDisplacement());
+            }
+
+            LOGGER.debug("displacement " + displacement);
+            char filling = displacement.charAt(0);
+            //logic extend
             if (oneByteDisplacement) {
                 for (int i = 0; i < 8 - displacement.length(); i++) {
-                    builder.append('0');
+                    builder.append(filling);
                 }
             } else {
                 for (int i = 0; i < 32 - displacement.length(); i++) {
-                    builder.append('0');
+                    builder.append(filling);
                 }
             }
             LOGGER.debug("displacement " + displacement);
@@ -290,55 +299,202 @@ public class Instruction {
         return BitSetUtils.fromBinaryStringToByteArray(instructionStr);
     }
 
-    private static String readAndIncreaseAddress(byte[] bytes, MutableInt currentLocation) throws Exception{
+    @Override
+    public String toString() {
+        return opcode.toString() + " " + getDestination().toString() + ", " + getSource().toString();
+    }
+
+    private static String readAndIncreaseAddress(byte[] bytes, MutableInt currentLocation) throws Exception {
         int location = currentLocation.getValue();
-        if(location >= bytes.length){
-            throw new Exception("the currentLocation "+ currentLocation +" is out bounded");
+        if (location >= bytes.length) {
+            throw new Exception("the currentLocation " + currentLocation + " is out bounded");
         }
         currentLocation.add(1);
         return BitSetUtils.toString(bytes[location]);
     }
 
-    public static Instruction fromBytes(byte[] bytes, MutableInt currentLocation) throws Exception{
-        String value = readAndIncreaseAddress(bytes,currentLocation);
+    private static Register getRegisterFromCode(String code, RegisterLength length) throws Exception {
+        Optional<Register> r = Register.of(length, code);
+        if (!r.isPresent()) {
+            throw new Exception("invalid register code " + code);
+        }
+        return r.get();
+    }
+
+    private static int readDisplacement(byte[] bytes, MutableInt currentLocation, int length) throws Exception {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            builder.append(readAndIncreaseAddress(bytes, currentLocation));
+        }
+        final String dis = builder.toString();
+
+        return BitSetUtils.getTwosComplement(dis);
+    }
+
+    private static int readImmediate(byte[] bytes, MutableInt currentLocation, int length) throws Exception {
+        return readDisplacement(bytes, currentLocation, length);
+    }
+
+    private static Operand.Builder readSIB(byte[] bytes, MutableInt currentLocation, Mode mode, RegisterLength length) throws Exception {
+        String sib = readAndIncreaseAddress(bytes, currentLocation);
+        String scale = sib.substring(0, 2);
+        String index = sib.substring(2, 5);
+        String base = sib.substring(5);
+        if ("100".equals(index)) {
+            throw new Exception("100 is invalid for index register");
+        }
+        Register index_reg = getRegisterFromCode(index, length);
+        final Register base_reg;
+
+        if ("101".equals(base) && Mode.SIB.equals(mode)) {
+            base_reg = null;
+        } else {
+            base_reg = getRegisterFromCode(base, length);
+        }
+        int scale_decimal = (int) Math.pow(2, Integer.parseInt(scale, 2));
+        return new Operand.Builder().sib(base_reg, index_reg, scale_decimal);
+
+    }
+
+    public static Instruction fromBytes(byte[] bytes, MutableInt currentLocation) throws Exception {
+        String value = readAndIncreaseAddress(bytes, currentLocation);
         boolean isSixTeenRegister = false;
         boolean isImmediate = false;
-        if("11111111".equals(value)){
+        if ("11111111".equals(value)) {
             isSixTeenRegister = true;
-            value = readAndIncreaseAddress(bytes,currentLocation);
+            value = readAndIncreaseAddress(bytes, currentLocation);
         }
-        String opCode = value.substring(0,6);
-        Optional<Op> op= OpCode.of(opCode);
-        if(!op.isPresent()){
-            if(opCode.charAt(0)=='1'){
+        String opCode = value.substring(0, 6);
+        Optional<Op> op = OpCode.of(opCode);
+        if (!op.isPresent()) {
+            if (opCode.charAt(0) == '1') {
                 opCode = "0" + opCode.substring(1);
+                isImmediate = true;
                 op = OpCode.of(opCode);
             }
-            if(!op.isPresent()){
-                throw new Exception("the opcode "+opCode+" is not valid");
+            if (!op.isPresent()) {
+                throw new Exception("the opcode " + opCode + " is not valid");
             }
         }
         boolean isFromMemToReg = false;
-        if(value.charAt(6)=='1'){
+        if (value.charAt(6) == '1') {
             isFromMemToReg = true;
         }
         boolean isEightBitsRegister = false;
-        if(value.charAt(7)=='0'){
+        if (value.charAt(7) == '0') {
             isEightBitsRegister = true;
-            if(isSixTeenRegister){
+            if (isSixTeenRegister) {
                 throw new Exception("16 bits prefix follows a eight bit instruction");
             }
         }
-        value = readAndIncreaseAddress(bytes,currentLocation);
-        Mode mode = null;
+        final RegisterLength length;
+        if (isEightBitsRegister) {
+            length = RegisterLength.EIGHT;
+        } else if (isSixTeenRegister) {
+            length = RegisterLength.SIXTEEN;
+        } else {
+            length = RegisterLength.THIRY_TWO;
+        }
+        value = readAndIncreaseAddress(bytes, currentLocation);
+        final Mode mode;
+        String modeStr = value.substring(0, 2);
+        String reigsterStr = value.substring(2, 5);
+        String memRegisterStr = value.substring(5);
         boolean isDisplacement = false;
         boolean isOneByteDisplacement = false;
-        if("01".equals(value.substring(0,2))||"10".equals(value.substring(0,2))){
-            isDisplacement = true;
-            if("01".equals(value.substring(0,2))){
-                isOneByteDisplacement = true;
+
+        if ("00".equals(modeStr)) {
+            if ("100".equals(memRegisterStr)) {
+                mode = Mode.SIB;
+            } else if ("101".equals(memRegisterStr)) {
+                mode = Mode.DISPLACEMENT_ONLY;
+            } else {
+                mode = Mode.INDIRECT;
             }
+        } else if ("01".equals(modeStr)) {
+            isDisplacement = true;
+            isOneByteDisplacement = true;
+            if ("100".equals(memRegisterStr)) {
+                mode = Mode.SIB_DISPLACEMENT_FOLLOWED;
+            } else {
+                mode = Mode.INDIRECT_DISPLACEMENT_FOLLOWED;
+            }
+        } else if ("10".equals(modeStr)) {
+            isDisplacement = true;
+            if ("100".equals(memRegisterStr)) {
+                mode = Mode.SIB_DISPLACEMENT_FOLLOWED;
+            } else {
+                mode = Mode.INDIRECT_DISPLACEMENT_FOLLOWED;
+            }
+        } else {
+            mode = Mode.REGISTER;
         }
-        return null;
+
+        final Register register_reg;
+        if (!isImmediate) {
+            register_reg = getRegisterFromCode(reigsterStr, length);
+        } else {
+            register_reg = null;
+        }
+
+        final Register memRegister_reg;
+        if (Mode.DISPLACEMENT_ONLY.equals(mode) || Mode.SIB.equals(mode) || Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode)) {
+            memRegister_reg = null;
+        } else {
+            memRegister_reg = getRegisterFromCode(memRegisterStr, length);
+        }
+        final Operand memRegister;
+        int displacement = 0;
+        switch (mode) {
+            case INDIRECT_DISPLACEMENT_FOLLOWED:
+                displacement = readDisplacement(bytes, currentLocation, isOneByteDisplacement ? 1 : 4);
+                memRegister = new Operand.Builder().indirect(memRegister_reg).displacement(displacement).build();
+                break;
+            case REGISTER:
+                memRegister = new Operand.Builder().register(memRegister_reg).build();
+                break;
+            case INDIRECT:
+                memRegister = new Operand.Builder().indirect(memRegister_reg).build();
+                break;
+            case DISPLACEMENT_ONLY:
+                displacement = readDisplacement(bytes, currentLocation, 4);
+                // for displacement only mode. Always 4 byte displacement
+                memRegister = new Operand.Builder().displacement(displacement).build();
+                break;
+            case SIB:
+                LOGGER.debug("sib only");
+                memRegister = readSIB(bytes, currentLocation, mode, length).build();
+                break;
+            case SIB_DISPLACEMENT_FOLLOWED:
+                LOGGER.debug("sib with displacement");
+                Operand.Builder sibBuilder = readSIB(bytes, currentLocation, mode, length);
+                displacement = readDisplacement(bytes, currentLocation, isOneByteDisplacement ? 1 : 4);
+                memRegister = sibBuilder.displacement(displacement).build();
+                break;
+            default:
+                memRegister = null;
+                break;
+        }
+        final Operand register;
+        if (isImmediate) {
+            int immediateLength = 4;
+            if (isEightBitsRegister) {
+                immediateLength = 1;
+            } else if (isSixTeenRegister) {
+                immediateLength = 2;
+            }
+            int immediate = readImmediate(bytes, currentLocation, immediateLength);
+            register = new Operand.Builder().immediate(immediate).build();
+        } else {
+            register = new Operand.Builder().register(register_reg).build();
+        }
+        Instruction ret = null;
+        if (isFromMemToReg) {
+            ret = new Instruction(op.get(), register, memRegister);
+        } else {
+            ret = new Instruction(op.get(), memRegister, register);
+        }
+        LOGGER.info("convert to instruction { " + ret + " }");
+        return ret;
     }
 }

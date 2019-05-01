@@ -1,6 +1,8 @@
 package Instructions;
 
 
+import org.apache.log4j.Logger;
+
 import javax.naming.OperationNotSupportedException;
 
 /**
@@ -9,7 +11,7 @@ import javax.naming.OperationNotSupportedException;
  * @author Hanzhou Tang
  */
 public class Operand {
-
+    private static Logger LOGGER = Logger.getLogger(Operand.class);
     final private Mode mode;
     final private int displacement;
     final private Register base;
@@ -41,7 +43,7 @@ public class Operand {
     }
 
     public Register getRegister() throws Exception {
-        if (Mode.REGISTER.equals(mode) || Mode.INDIRECT.equals(mode)||Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(mode)) {
+        if (Mode.REGISTER.equals(mode) || Mode.INDIRECT.equals(mode) || Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(mode)) {
             return base;
         }
         throw new OperationNotSupportedException();
@@ -53,6 +55,30 @@ public class Operand {
         this.base = builder.base;
         this.index = builder.index;
         this.scale = builder.scale;
+    }
+
+    @Override
+    public String toString() {
+        switch (mode) {
+            case SIB:
+                if (base == null) {
+                    return "[" + index + "*" + scale + "]";
+                }
+                return "[" + index + "*" + scale + "+" + base + "]";
+            case SIB_DISPLACEMENT_FOLLOWED:
+                return "[" + index + "*" + scale + "+" + base + (displacement >= 0 ? "+" : "") + displacement + "]";
+            case DISPLACEMENT_ONLY:
+                return "[" + displacement + "]";
+            case INDIRECT:
+                return "[" + base + "]";
+            case INDIRECT_DISPLACEMENT_FOLLOWED:
+                return "[" + base + (displacement >= 0 ? "+" : "") + displacement + "]";
+            case REGISTER:
+                return base.toString();
+            case IMMEDIATE:
+                return String.valueOf(displacement);
+        }
+        return super.toString();
     }
 
     public static class Builder {
@@ -76,17 +102,20 @@ public class Operand {
         }
 
         public Builder sib(Register base, Register index, int scale) throws Exception {
-            if (mode != null && !Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) && !Mode.SIB.equals(mode)&&!Mode.DISPLACEMENT_ONLY.equals(mode)) {
+            if (mode != null && !Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) && !Mode.SIB.equals(mode) && !Mode.DISPLACEMENT_ONLY.equals(mode)) {
                 throw new Exception("SIB mode cannot be together with {} " + mode.name());
             }
-            if(Mode.DISPLACEMENT_ONLY.equals(mode)){
+            if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
                 mode = Mode.SIB_DISPLACEMENT_FOLLOWED;
-            }
-            else {
+            } else {
                 mode = Mode.SIB;
             }
             this.base = base;
             this.index = index;
+            if ("100".equals(index.getRegisterCode())) {
+                throw new Exception("illegal index code 100");
+            }
+            LOGGER.debug("scale " + scale);
             if (scale != 1 && scale != 2 && scale != 4 && scale != 8) {
                 throw new Exception("scale must be 1, 2, 4 or 8");
             }

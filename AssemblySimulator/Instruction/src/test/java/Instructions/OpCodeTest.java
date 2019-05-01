@@ -31,9 +31,9 @@ public class OpCodeTest {
 
     @Test
     public void getOpCodeFromBinary(){
-        final Optional<Op> op = OpCode.of("100000");
-        Assert.assertEquals(Optional.of(LOOP),op);
-        Assert.assertEquals("100000",op.map(x->x.getOpCode()).orElseGet(() -> ""));
+        final Optional<Op> op = OpCode.of("011111");
+        Assert.assertEquals(Optional.of(NOP),op);
+        Assert.assertEquals("011111",op.map(x->x.getOpCode()).orElseGet(() -> ""));
     }
 
     @Ignore

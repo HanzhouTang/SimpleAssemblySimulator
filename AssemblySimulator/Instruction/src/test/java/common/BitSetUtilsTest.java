@@ -14,8 +14,20 @@ public class BitSetUtilsTest {
     public void ConvertFromStringTest() throws Exception{
         final String str = "010101";
         BitSet bitSet = BitSetUtils.fromString(str);
-        String result = BitSetUtils.toString(bitSet, 6);
-        Assert.assertEquals(str, result);
+        String result = BitSetUtils.toString(bitSet, 8);
+        Assert.assertEquals("00010101", result);
+    }
+
+    @Test
+    public void ConvertByteToString(){
+        Byte b = -128;
+        Assert.assertEquals("10000000",BitSetUtils.toString(b.byteValue()));
+    }
+
+    @Test
+    public  void TwoComplement(){
+        String str = "10000000000000000000000000000000";
+        Assert.assertEquals(-2147483648,BitSetUtils.getTwosComplement(str));
     }
 
     @Test
@@ -69,8 +81,8 @@ public class BitSetUtilsTest {
         String[] tests = {"100000","100001","100010"};
         for (String from : tests) {
             BitSet bitSet = BitSetUtils.fromString(from);
-            final String to = BitSetUtils.toString(bitSet, 6);
-            Assert.assertEquals(from, to);
+            final String to = BitSetUtils.toString(bitSet, 8);
+            Assert.assertEquals("00"+from, to);
         }
     }
 }

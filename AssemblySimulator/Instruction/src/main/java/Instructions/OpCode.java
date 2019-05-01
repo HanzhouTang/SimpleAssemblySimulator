@@ -23,40 +23,34 @@ public enum OpCode implements Op {
     PUSH("000111"),
     POP("001000"),
     CBW("001001"),
-    CWD("001010"),
-    BSWAP("001011"),
-    AND("001100"),
-    OR("001101"),
-    XOR("001110"),
-    NOT("001111"),
-    SAL("010000"),
-    SHL("010001"),
-    SAR("010010"),
-    SHR("010011"),
-    CMPSB("010100"), // the opcode of CMPSB, CMPSW and CMPSD are same. Because the length of register will distinguish them.
-    CMPSW("010100"),
-    CMPSD("010100"),
-    LODSB("010101"), // the opcode of LODSB, LODSW and LODSD are same. Because the length of register will distinguish them.
-    LODSW("010101"),
-    LODSD("010101"),
-    STOSB("010110"), // the opcode of STOSB, STOSW and STOSD are same. Because the length of register will distinguish them.
-    STOSW("010110"),
-    STOSD("010110"),
-    REP("010111"),
-    REPNE("011000"),
-    JMP("011001"),
-    JCC("011010"),
-    JECXZ("011011"),
-    CALL("011100"),
-    RET("011101"),
-    ENTER("011110"),
-    LEAVE("011111"),
-    LOOP("100000"),
-    LOOPE("100001"),
-    LOOPZ("100010"),
-    LOOPNE("100011"),
-    LOOPNZ("100100"),
-    NOP("100101");
+    AND("001010"),
+    OR("001011"),
+    XOR("001100"),
+    NOT("001101"),
+    SHL("001110"),
+    SHR("001111"),
+    CMPSB("010000"), // the opcode of CMPSB, CMPSW and CMPSD are same. Because the length of register will distinguish them.
+    CMPSW("010000"),
+    CMPSD("010000"),
+    LODSB("010001"), // the opcode of LODSB, LODSW and LODSD are same. Because the length of register will distinguish them.
+    LODSW("010001"),
+    LODSD("010001"),
+    STOSB("010010"), // the opcode of STOSB, STOSW and STOSD are same. Because the length of register will distinguish them.
+    STOSW("010010"),
+    STOSD("010010"),
+    REP("010011"),
+    REPNE("010100"),
+    JMP("010101"),
+    JCC("010110"),
+    JECXZ("010111"),
+    CALL("011000"),
+    RET("011001"),
+    ENTER("011010"),
+    LEAVE("011011"),
+    LOOP("011100"),
+    LOOPZ("011101"),
+    LOOPNZ("011110"),
+    NOP("011111");
     private final String opcode;
 
     OpCode(String bits) {
@@ -91,27 +85,27 @@ public enum OpCode implements Op {
 
     public static Optional<Op> of(final String opcode, final RegisterLength length) {
         if (RegisterLength.SIXTEEN.equals(length)) {
-            if ("010100".equals(opcode)) {
+            if (CMPSW.getOpCode().equals(opcode)) {
                 return Optional.of(CMPSW);
-            } else if ("010101".equals(opcode)) {
+            } else if (LODSW.getOpCode().equals(opcode)) {
                 return Optional.of(LODSW);
-            } else if ("010110".equals(opcode)) {
+            } else if (STOSW.getOpCode().equals(opcode)) {
                 return Optional.of(STOSW);
             }
         } else if (RegisterLength.THIRY_TWO.equals(length)) {
-            if ("010100".equals(opcode)) {
+            if (CMPSD.getOpCode().equals(opcode)) {
                 return Optional.of(CMPSD);
-            } else if ("010101".equals(opcode)) {
+            } else if (LODSD.getOpCode().equals(opcode)) {
                 return Optional.of(LODSD);
-            } else if ("010110".equals(opcode)) {
+            } else if (STOSD.getOpCode().equals(opcode)) {
                 return Optional.of(STOSD);
             }
         } else {
-            if ("010100".equals(opcode)) {
+            if (CMPSB.getOpCode().equals(opcode)) {
                 return Optional.of(CMPSB);
-            } else if ("010101".equals(opcode)) {
+            } else if (LODSB.getOpCode().equals(opcode)) {
                 return Optional.of(LODSB);
-            } else if ("010110".equals(opcode)) {
+            } else if (STOSB.getOpCode().equals(opcode)) {
                 return Optional.of(STOSB);
             }
         }
@@ -122,7 +116,7 @@ public enum OpCode implements Op {
             .collect(Collectors.toMap(Object::toString, Function.identity()));
 
     private static final Map<String, Op> bitsToOpCode = Stream.of(OpCode.values())
-            .collect(Collectors.toMap(Op::getOpCode, Function.identity(),(op1,op2)->op2));
+            .collect(Collectors.toMap(Op::getOpCode, Function.identity(), (op1, op2) -> op2));
 
     public static Optional<Op> fromMem(final String mem) {
         return Optional.ofNullable(memToOpCode.get(mem.toUpperCase()));
