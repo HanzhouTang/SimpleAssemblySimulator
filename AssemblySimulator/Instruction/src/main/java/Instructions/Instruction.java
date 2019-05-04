@@ -5,14 +5,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.log4j.Logger;
 
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The instruction class.
  * All source code will convert to consecutive instruction objects.
+ * For one operand instruction, always set source.
  */
 public class Instruction {
     private static Logger LOGGER = Logger.getLogger(Instruction.class);
@@ -59,16 +57,16 @@ public class Instruction {
 
     public Instruction(Op op, Operand destination, Operand source) throws Exception {
         opcode = op;
-        if (Mode.IMMEDIATE.equals(source.getMode())) {
+        if (source != null && Mode.IMMEDIATE.equals(source.getMode())) {
             LOGGER.debug("immediate source");
             isFromMemToReg = false;
             register = source;
             memRegister = destination;
-        } else if (Mode.REGISTER.equals(source.getMode())) {
+        } else if (source != null && Mode.REGISTER.equals(source.getMode())) {
             isFromMemToReg = false;
             register = source;
             memRegister = destination;
-        } else if (Mode.REGISTER.equals(destination.getMode())) {
+        } else if (destination != null && Mode.REGISTER.equals(destination.getMode())) {
             isFromMemToReg = true;
             register = destination;
             memRegister = source;
@@ -76,7 +74,7 @@ public class Instruction {
             throw new Exception("there must be at least one register operand in source or destination. Or there is a immediate number in source");
         }
         if (Mode.IMMEDIATE.equals(register.getMode())) {
-            if (Mode.REGISTER.equals(memRegister.getMode())) {
+            if (memRegister != null && Mode.REGISTER.equals(memRegister.getMode())) {
                 if (RegisterLength.EIGHT.equals(memRegister.getRegister().getRegisterLength())) {
                     isEightBitsRegister = true;
                     isSixteenBitsRegister = false;
@@ -101,7 +99,7 @@ public class Instruction {
             } else {
                 isEightBitsRegister = false;
                 isSixteenBitsRegister = false;
-                throw new Exception("cannot infer register length from instruction");
+                //throw new Exception("cannot infer register length from instruction");
             }
         } else {
             if (RegisterLength.EIGHT.equals(register.getRegister().getRegisterLength())) {
@@ -115,13 +113,14 @@ public class Instruction {
                 isEightBitsRegister = false;
             }
         }
-        if (Mode.REGISTER.equals(register.getMode()) && Mode.REGISTER.equals(memRegister.getMode())) {
-            if (!register.getRegister().getRegisterLength().equals(memRegister.getRegister().getRegisterLength())) {
-                throw new Exception("the dest " + getDestination().getRegister() +
-                        " register and source register " + getSource().getRegister() + " must have the same length");
+        if (register != null && memRegister != null) {
+            if (Mode.REGISTER.equals(register.getMode()) && Mode.REGISTER.equals(memRegister.getMode())) {
+                if (!register.getRegister().getRegisterLength().equals(memRegister.getRegister().getRegisterLength())) {
+                    throw new Exception("the dest " + getDestination().getRegister() +
+                            " register and source register " + getSource().getRegister() + " must have the same length");
+                }
             }
         }
-
     }
 
     public Operand getSource() {
@@ -149,7 +148,10 @@ public class Instruction {
         //To simplify, use string manipulate here.
         //Need make it more efficient later.
         boolean isImmediate = false;
-        Mode mode = getMemRegister().getMode();
+        Mode mode = null;
+        if (getMemRegister() != null) {
+            mode = getMemRegister().getMode();
+        }
         if (Mode.IMMEDIATE.equals(getRegister().getMode())) {
             isImmediate = true;
         }
@@ -163,56 +165,66 @@ public class Instruction {
         builder.append(isFromMemToReg ? '1' : '0');
         builder.append(isEightBitsRegister ? '0' : '1');
         boolean oneByteDisplacement = false;
-        if (getMemRegister().getDisplacement() >= -128 && getMemRegister().getDisplacement() <= 127) {
-            oneByteDisplacement = true;
+        if (getMemRegister() != null) {
+            if (getMemRegister().getDisplacement() >= -128 && getMemRegister().getDisplacement() <= 127) {
+                oneByteDisplacement = true;
+            }
         }
+
         boolean isSIB = false;
         boolean isDisplacement = false;
-        LOGGER.debug("mode " + mode.name());
-        switch (mode) {
-            case REGISTER:
-                builder.append("11");
-                break;
-            case DISPLACEMENT_ONLY:
-                builder.append("00");
-                oneByteDisplacement = false;
-                //for displacement only mode. Always follow a 4 byte displacement.
-                isDisplacement = true;
-                break;
-            case INDIRECT:
-                builder.append("00");
-                break;
-            case SIB:
-                builder.append("00");
-                isSIB = true;
-                break;
-            case IMMEDIATE:
-                builder.append("00");
-                break;
-            case SIB_DISPLACEMENT_FOLLOWED:
-                isSIB = true;
-                isDisplacement = true;
-                if (oneByteDisplacement) {
-                    builder.append("01");
-                } else {
-                    builder.append("10");
-                }
-                break;
-            case INDIRECT_DISPLACEMENT_FOLLOWED:
-                isDisplacement = true;
-                if (oneByteDisplacement) {
-                    builder.append("01");
-                } else {
-                    builder.append("10");
-                }
-                break;
+        if (mode != null) {
+            LOGGER.debug("mode " + mode.name());
         }
+        if (mode != null) {
+            switch (mode) {
+                case REGISTER:
+                    builder.append("11");
+                    break;
+                case DISPLACEMENT_ONLY:
+                    builder.append("00");
+                    oneByteDisplacement = false;
+                    //for displacement only mode. Always follow a 4 byte displacement.
+                    isDisplacement = true;
+                    break;
+                case INDIRECT:
+                    builder.append("00");
+                    break;
+                case SIB:
+                    builder.append("00");
+                    isSIB = true;
+                    break;
+                case SIB_DISPLACEMENT_FOLLOWED:
+                    isSIB = true;
+                    isDisplacement = true;
+                    if (oneByteDisplacement) {
+                        builder.append("01");
+                    } else {
+                        builder.append("10");
+                    }
+                    break;
+                case INDIRECT_DISPLACEMENT_FOLLOWED:
+                    isDisplacement = true;
+                    if (oneByteDisplacement) {
+                        builder.append("01");
+                    } else {
+                        builder.append("10");
+                    }
+                    break;
+            }
+        } else {
+            builder.append("00");
+            // for instruction like jump
+        }
+
         if (isImmediate) {
             builder.append("000");
         } else {
             builder.append(register.getRegister().getRegisterCode());
         }
-        if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
+        if (mode == null) {
+            builder.append("000");
+        } else if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
             builder.append("101");
         } else if (isSIB) {
             builder.append("100");
@@ -253,7 +265,10 @@ public class Instruction {
             }
 
             LOGGER.debug("displacement " + displacement);
-            char filling = displacement.charAt(0);
+            char filling = '0';
+            if (memRegister.getDisplacement() < 0) {
+                filling = '1';
+            }
             //logic extend
             if (oneByteDisplacement) {
                 for (int i = 0; i < 8 - displacement.length(); i++) {
@@ -301,7 +316,7 @@ public class Instruction {
 
     @Override
     public String toString() {
-        return opcode.toString() + " " + getDestination().toString() + ", " + getSource().toString();
+        return opcode.toString() + " " + (getDestination() != null ? getDestination().toString() : "") + ", " + getSource().toString();
     }
 
     private static String readAndIncreaseAddress(byte[] bytes, MutableInt currentLocation) throws Exception {
@@ -355,6 +370,7 @@ public class Instruction {
         return new Operand.Builder().sib(base_reg, index_reg, scale_decimal);
 
     }
+
 
     public static Instruction fromBytes(byte[] bytes, MutableInt currentLocation) throws Exception {
         String value = readAndIncreaseAddress(bytes, currentLocation);
@@ -448,13 +464,13 @@ public class Instruction {
         switch (mode) {
             case INDIRECT_DISPLACEMENT_FOLLOWED:
                 displacement = readDisplacement(bytes, currentLocation, isOneByteDisplacement ? 1 : 4);
-                memRegister = new Operand.Builder().indirect(memRegister_reg).displacement(displacement).build();
+                memRegister = new Operand.Builder().base(memRegister_reg).displacement(displacement).build();
                 break;
             case REGISTER:
                 memRegister = new Operand.Builder().register(memRegister_reg).build();
                 break;
             case INDIRECT:
-                memRegister = new Operand.Builder().indirect(memRegister_reg).build();
+                memRegister = new Operand.Builder().base(memRegister_reg).build();
                 break;
             case DISPLACEMENT_ONLY:
                 displacement = readDisplacement(bytes, currentLocation, 4);

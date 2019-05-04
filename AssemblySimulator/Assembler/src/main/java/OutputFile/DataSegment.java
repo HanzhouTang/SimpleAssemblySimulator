@@ -75,7 +75,7 @@ public class DataSegment implements SupportTwoParsingPass {
     }
 
     @Override
-    public void resetAfterFirstParsingPass() {
+    public void resetAfterFirstParsingPass(Object... params) throws Exception{
         data.clear();
     }
 }

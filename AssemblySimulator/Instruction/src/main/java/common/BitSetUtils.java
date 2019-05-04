@@ -45,9 +45,10 @@ public class BitSetUtils {
     /**
      * Though Java doesn't provide a method for parse 2's complement.
      * It very easy to implement it.
-     * @see https://stackoverflow.com/questions/37058582/how-to-convert-twos-complement-binary-string-to-negative-decimal-number
+     *
      * @param binaryInt a binary string
      * @return int value
+     * @see https://stackoverflow.com/questions/37058582/how-to-convert-twos-complement-binary-string-to-negative-decimal-number
      */
     public static int getTwosComplement(String binaryInt) {
         //Check if the number is negative.
@@ -62,7 +63,7 @@ public class BitSetUtils {
             //because we know it's a negative number
             decimalValue = (decimalValue + 1) * -1;
             //return the final result
-            return (int)decimalValue;
+            return (int) decimalValue;
         } else {
             //Else we know it's a positive number, so just convert
             //the number to decimal base.
@@ -79,14 +80,14 @@ public class BitSetUtils {
     }
 
 
-    public static String toString(byte x){
-        return Integer.toBinaryString((x& 0xFF) + 0x100).substring(1);
+    public static String toString(byte x) {
+        return Integer.toBinaryString((x & 0xFF) + 0x100).substring(1);
     }
 
-    public static String toString(byte[] bytes){
+    public static String toString(byte[] bytes) {
         StringBuilder builder = new StringBuilder();
-        for(byte x : bytes){
-            builder.append(Integer.toBinaryString((x& 0xFF) + 0x100).substring(1));
+        for (byte x : bytes) {
+            builder.append(Integer.toBinaryString((x & 0xFF) + 0x100).substring(1));
         }
         return builder.toString();
     }
@@ -115,6 +116,10 @@ public class BitSetUtils {
             String tmp = str.substring(i, Math.min(i + 8, str.length()));
             list.add(fromBinaryStringToByte(tmp));
         }
+        return toByteArray(list);
+    }
+
+    public static byte[] toByteArray(List<Byte> list) {
         byte[] ret = new byte[list.size()];
         for (int i = 0; i < list.size(); i++) {
             ret[i] = list.get(i);
@@ -132,7 +137,7 @@ public class BitSetUtils {
             return stringBuilder.toString();
         } else {
             final String value = toString(bitSet);
-            LOGGER.debug("convert value " +value);
+            LOGGER.debug("convert value " + value);
             if (value.length() == size) {
                 return value;
             } else if (value.length() < size) {

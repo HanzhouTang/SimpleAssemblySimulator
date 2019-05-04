@@ -88,7 +88,16 @@ public class Operand {
         private int scale = 0;
         private int displacement = 0;
 
+        public Mode getMode() {
+            return mode;
+        }
+
         public Operand build() {
+            LOGGER.debug("mode " + mode);
+            LOGGER.debug("base " + base);
+            LOGGER.debug("index " + index);
+            LOGGER.debug("scale " + scale);
+            LOGGER.debug("displacement/immediate " + displacement);
             return new Operand(this);
         }
 
@@ -101,29 +110,66 @@ public class Operand {
             return this;
         }
 
-        public Builder sib(Register base, Register index, int scale) throws Exception {
-            if (mode != null && !Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) && !Mode.SIB.equals(mode) && !Mode.DISPLACEMENT_ONLY.equals(mode)) {
+        private void sibStateUpdate() throws Exception {
+            if (Mode.IMMEDIATE.equals(mode) || Mode.REGISTER.equals(mode)) {
                 throw new Exception("SIB mode cannot be together with {} " + mode.name());
             }
-            if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
+            if (Mode.DISPLACEMENT_ONLY.equals(mode) || Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode)) {
                 mode = Mode.SIB_DISPLACEMENT_FOLLOWED;
             } else {
                 mode = Mode.SIB;
             }
+        }
+
+        public void sibScaleChecker(int scale) throws Exception {
+            if (scale != 1 && scale != 2 && scale != 4 && scale != 8) {
+                throw new Exception("scale must be 1, 2, 4 or 8");
+            }
+        }
+
+        public Builder index(Register index) throws Exception {
+            sibStateUpdate();
+            this.index = index;
+            if (index != null && "100".equals(index.getRegisterCode())) {
+                throw new Exception("illegal index code 100");
+            }
+            return this;
+        }
+
+
+        public Builder scale(int scale) throws Exception {
+            sibStateUpdate();
+            sibScaleChecker(scale);
+            this.scale = scale;
+            return this;
+        }
+
+        public Builder sib(Register base, Register index, int scale) throws Exception {
+            sibStateUpdate();
             this.base = base;
             this.index = index;
             if ("100".equals(index.getRegisterCode())) {
                 throw new Exception("illegal index code 100");
             }
             LOGGER.debug("scale " + scale);
-            if (scale != 1 && scale != 2 && scale != 4 && scale != 8) {
-                throw new Exception("scale must be 1, 2, 4 or 8");
-            }
+            sibScaleChecker(scale);
             this.scale = scale;
             return this;
         }
 
-        public Builder indirect(Register r) throws Exception {
+        public Builder base(Register base) throws Exception {
+            if (Mode.REGISTER.equals(mode) || Mode.IMMEDIATE.equals(mode)) {
+                throw new Exception("Indirect mode cannot be together with " + mode.name());
+            } else if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
+                mode = Mode.INDIRECT_DISPLACEMENT_FOLLOWED;
+            } else if (mode == null) {
+                mode = Mode.INDIRECT;
+            }
+            this.base = base;
+            return this;
+        }
+
+        /*public Builder indirect(Register r) throws Exception {
             if (Mode.SIB.equals(mode) || Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) || Mode.REGISTER.equals(mode) || Mode.IMMEDIATE.equals(mode)) {
                 throw new Exception("Indirect mode cannot be together with " + mode.name());
             } else if (Mode.DISPLACEMENT_ONLY.equals(mode)) {
@@ -133,7 +179,7 @@ public class Operand {
             }
             base = r;
             return this;
-        }
+        }*/
 
         public Builder displacement(int number) throws Exception {
             if (Mode.IMMEDIATE.equals(mode)) {

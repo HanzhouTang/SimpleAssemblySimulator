@@ -93,7 +93,7 @@ public class InstructionTest {
     @Test
     public void AddTwo32BitsInstruction_16() throws Exception {
         Operand dest = new Operand.Builder().register(Register.fromName("edi").get()).build();
-        Operand source = new Operand.Builder().indirect(Register.fromName("ebx").get()).build();
+        Operand source = new Operand.Builder().base(Register.fromName("ebx").get()).build();
         Instruction add = new Instruction(ADD, dest, source);
         byte[] bytes = add.toBytes();
         StringBuilder builder = new StringBuilder();
@@ -118,7 +118,7 @@ public class InstructionTest {
     @Test
     public void AddTwo32BitsInstruction_17() throws Exception {
         Operand dest = new Operand.Builder().register(Register.fromName("eax").get()).build();
-        Operand source = new Operand.Builder().indirect(Register.fromName("esi").get()).displacement(-1).build();
+        Operand source = new Operand.Builder().base(Register.fromName("esi").get()).displacement(-1).build();
         Instruction add = new Instruction(ADD, dest, source);
         byte[] bytes = add.toBytes();
         StringBuilder builder = new StringBuilder();
@@ -143,7 +143,7 @@ public class InstructionTest {
     @Test
     public void AddTwo32BitsInstruction_18() throws Exception {
         Operand dest = new Operand.Builder().register(Register.fromName("ebx").get()).build();
-        Operand source = new Operand.Builder().indirect(Register.fromName("ebp").get()).displacement(-129).build();
+        Operand source = new Operand.Builder().base(Register.fromName("ebp").get()).displacement(-129).build();
         Instruction add = new Instruction(ADD, dest, source);
         byte[] bytes = add.toBytes();
         StringBuilder builder = new StringBuilder();
@@ -259,6 +259,55 @@ public class InstructionTest {
         }
         Assert.assertEquals(3, bytes.length);
         Assert.assertEquals("111111110000000111000001", builder.toString());
+    }
+
+    @Test
+    public void JumpTest() throws Exception {
+        Operand source = new Operand.Builder().immediate(123).build();
+        Instruction instruction = new Instruction(JMP, null, source);
+        byte[] bytes = instruction.toBytes();
+        StringBuilder builder = new StringBuilder();
+        for (byte x : bytes) {
+            builder.append(Integer.toBinaryString((x & 0xFF) + 0x100).substring(1));
+        }
+        Assert.assertEquals(6, bytes.length);
+        Assert.assertEquals("110101010000000000000000000000000000000001111011", builder.toString());
+    }
+
+    // for one operand instruction, always set source
+    @Test
+    public void CreateInstructionByByteArray_jump() throws Exception {
+        //jump 123
+        final String binaryCode = "110101010000000000000000000000000000000001111011";
+        byte[] bytes = BitSetUtils.fromBinaryStringToByteArray(binaryCode);
+        MutableInt currentLocation = new MutableInt(0);
+        Instruction instruction = Instruction.fromBytes(bytes, currentLocation);
+        Assert.assertEquals(6, currentLocation.getValue().intValue());
+        Assert.assertEquals(binaryCode, BitSetUtils.toString(instruction.toBytes()));
+    }
+
+    @Test
+    public void PushTest() throws Exception {
+        Operand source = new Operand.Builder().register(Register.fromName("eax").get()).build();
+        Instruction instruction = new Instruction(PUSH, null, source);
+        byte[] bytes = instruction.toBytes();
+        StringBuilder builder = new StringBuilder();
+        for (byte x : bytes) {
+            builder.append(Integer.toBinaryString((x & 0xFF) + 0x100).substring(1));
+        }
+        Assert.assertEquals(2, bytes.length);
+        Assert.assertEquals("0001110100000000", builder.toString());
+    }
+
+    @Test
+    public void CreateInstructionByByteArray_push() throws Exception {
+        //push eax
+        final String binaryCode = "0001110100000000";
+        byte[] bytes = BitSetUtils.fromBinaryStringToByteArray(binaryCode);
+        MutableInt currentLocation = new MutableInt(0);
+        Instruction instruction = Instruction.fromBytes(bytes, currentLocation);
+        Assert.assertEquals(2, currentLocation.getValue().intValue());
+        Assert.assertEquals(binaryCode, BitSetUtils.toString(instruction.toBytes()));
     }
 
     @Test
