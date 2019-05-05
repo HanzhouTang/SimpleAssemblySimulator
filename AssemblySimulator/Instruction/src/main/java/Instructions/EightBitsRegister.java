@@ -40,6 +40,7 @@ public enum EightBitsRegister implements Register {
         return registerCode;
     }
 
+
     private static Map<String, Register> codeToRegister =
             Stream.of(values()).collect(Collectors.toMap(Register::getRegisterCode, Function.identity()));
 

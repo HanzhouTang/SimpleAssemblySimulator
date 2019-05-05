@@ -13,11 +13,12 @@ public interface Register {
 
     RegisterLength getRegisterLength();
 
+
     String getRegisterName();
 
     String getRegisterCode();
 
-    default BitSet getReigisterCodeBits(){
+    default BitSet getReigisterCodeBits() throws Exception{
         return BitSetUtils.fromString(getRegisterCode());
     }
 
