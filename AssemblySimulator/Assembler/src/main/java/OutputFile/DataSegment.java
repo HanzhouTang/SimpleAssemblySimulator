@@ -20,6 +20,10 @@ public class DataSegment implements SupportTwoParsingPass {
         nameTable.put(name, currentLocation);
     }
 
+    public List<Byte> getData() {
+        return data;
+    }
+
     public void addData(String str, DataType dataType) throws Exception {
         for (byte b : str.getBytes("US-ASCII")) {
             for (int i = 0; i < dataType.getSize() - 1; i++) {
@@ -75,7 +79,7 @@ public class DataSegment implements SupportTwoParsingPass {
     }
 
     @Override
-    public void resetAfterFirstParsingPass(Object... params) throws Exception{
+    public void resetAfterFirstParsingPass(Object... params) throws Exception {
         data.clear();
     }
 }

@@ -19,10 +19,19 @@ public class CodeSegment implements SupportTwoParsingPass {
     Map<String, Integer> labelTable = new HashMap<>();
     Map<String, Procedure> procedureTable = new HashMap<>();
     private int entryPoint;
+    private String entryPointProcedure;
     private int baseAddress = 0;
 
     public int getEntryPoint() {
         return entryPoint;
+    }
+
+    public String getEntryPointProcedure() {
+        return entryPointProcedure;
+    }
+
+    public int getBaseAddress(){
+        return baseAddress;
     }
 
     public List<Byte> getCode(){
@@ -33,6 +42,7 @@ public class CodeSegment implements SupportTwoParsingPass {
             int result = procedureTable.get(entryPoint).getStart() + baseAddress;
             LOGGER.debug("relocate location " + procedureTable.get(entryPoint).getStart() + " by baseAddress " + baseAddress + " result is " + +result);
             this.entryPoint = result;
+            this.entryPointProcedure = entryPoint;
         } else {
             throw new Exception("the entry point " + entryPoint + " is not existed");
         }
@@ -56,7 +66,7 @@ public class CodeSegment implements SupportTwoParsingPass {
     }
 
     public void addInstruction(Instruction instruction) throws Exception {
-        LOGGER.debug("add instruction {" + instruction + " }");
+        LOGGER.info("add instruction { " + instruction + " }");
         byte[] bytes = instruction.toBytes();
         if (bytes != null) {
             for (byte b : bytes) {

@@ -468,6 +468,10 @@ public class SimpleParser {
                     if (location != -1) {
                         return new Operand.Builder().immediate(location).build();
                     }
+                    location = obj.getDataSegment().getLocationByName(str);
+                    if(location!=-1){
+                        return new Operand.Builder().immediate(location).build();
+                    }
                     throw new Exception("the label <" + str + "> at line " + wrapper.getLineIndex() + " is not existed");
                 }
             }
@@ -484,6 +488,10 @@ public class SimpleParser {
             }
             return new Operand.Builder().immediate(number).build();
 
+        }
+        else if(Token.NewLine.equals(wrapper.getToken())){
+            return null;
+            // for ret instruction who doesn't have any operands.
         }
         throw new Exception("invalid token <" + wrapper.getToken() + "> for operand " + " at line " + wrapper.getLineIndex());
     }

@@ -274,6 +274,19 @@ public class InstructionTest {
         Assert.assertEquals("110101010000000000000000000000000000000001111011", builder.toString());
     }
 
+    @Test
+    public void RetTest() throws Exception {
+        Instruction instruction = new Instruction(RET, null, null);
+        byte[] bytes = instruction.toBytes();
+        StringBuilder builder = new StringBuilder();
+        for (byte x : bytes) {
+            builder.append(Integer.toBinaryString((x & 0xFF) + 0x100).substring(1));
+        }
+        Assert.assertEquals(2, bytes.length);
+        Assert.assertEquals("0110010100000000", builder.toString());
+    }
+
+
     // for one operand instruction, always set source
     @Test
     public void CreateInstructionByByteArray_jump() throws Exception {

@@ -1,9 +1,17 @@
 package OutputFile;
 
+import common.BitSetUtils;
+import org.apache.log4j.Logger;
+
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 /**
  * The output binary file
  */
 public class ObjFile implements SupportTwoParsingPass {
+    private static final Logger LOGGER = Logger.getLogger(ObjFile.class);
     DataSegment dataSegment = null;
 
     CodeSegment codeSegment = null;
@@ -28,5 +36,22 @@ public class ObjFile implements SupportTwoParsingPass {
         int dataSegmentLength = getDataSegment().getCurrentLocation();
         getDataSegment().resetAfterFirstParsingPass();
         getCodeSegment().resetAfterFirstParsingPass(dataSegmentLength);
+    }
+
+    public void dump(String filename) {
+        try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(filename))) {
+            dataOutputStream.writeInt(0X7f);// header, indicate this is a obj file
+            dataOutputStream.writeInt(getCodeSegment().getBaseAddress());// base address
+            LOGGER.info("Base address:     \t"+getCodeSegment().getBaseAddress());
+            dataOutputStream.writeInt(getCodeSegment().getEntryPoint());// entry address
+            LOGGER.info("Entry point:      \t"+getCodeSegment().getEntryPoint());
+            LOGGER.info("Entry procedure:  \t"+getCodeSegment().getEntryPointProcedure());
+            byte[] data = BitSetUtils.toByteArray(getDataSegment().getData());
+            byte[] code = BitSetUtils.toByteArray(getCodeSegment().getCode());
+            dataOutputStream.write(data,0,data.length);// data segment
+            dataOutputStream.write(code,0,code.length);// code segment
+        } catch (Exception e) {
+            LOGGER.error(e);
+        }
     }
 }

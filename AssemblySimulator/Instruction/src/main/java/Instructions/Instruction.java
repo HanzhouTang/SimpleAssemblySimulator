@@ -11,6 +11,7 @@ import java.util.*;
  * The instruction class.
  * All source code will convert to consecutive instruction objects.
  * For one operand instruction, always set source.
+ * TODO instead directly refer field, using get method.
  */
 public class Instruction {
     private static Logger LOGGER = Logger.getLogger(Instruction.class);
@@ -70,10 +71,14 @@ public class Instruction {
             isFromMemToReg = true;
             register = destination;
             memRegister = source;
+        } else if (destination == null && source == null) {
+            isFromMemToReg = false;
+            register = null;
+            memRegister = null;
         } else {
             throw new Exception("there must be at least one register operand in source or destination. Or there is a immediate number in source");
         }
-        if (Mode.IMMEDIATE.equals(register.getMode())) {
+        if (register != null && Mode.IMMEDIATE.equals(register.getMode())) {
             if (memRegister != null && Mode.REGISTER.equals(memRegister.getMode())) {
                 if (RegisterLength.EIGHT.equals(memRegister.getRegister().getRegisterLength())) {
                     isEightBitsRegister = true;
@@ -102,10 +107,10 @@ public class Instruction {
                 //throw new Exception("cannot infer register length from instruction");
             }
         } else {
-            if (RegisterLength.EIGHT.equals(register.getRegister().getRegisterLength())) {
+            if (register != null && RegisterLength.EIGHT.equals(register.getRegister().getRegisterLength())) {
                 isEightBitsRegister = true;
                 isSixteenBitsRegister = false;
-            } else if (RegisterLength.SIXTEEN.equals(register.getRegister().getRegisterLength())) {
+            } else if (register != null && RegisterLength.SIXTEEN.equals(register.getRegister().getRegisterLength())) {
                 isEightBitsRegister = false;
                 isSixteenBitsRegister = true;
             } else {
@@ -152,7 +157,7 @@ public class Instruction {
         if (getMemRegister() != null) {
             mode = getMemRegister().getMode();
         }
-        if (Mode.IMMEDIATE.equals(getRegister().getMode())) {
+        if (getRegister() != null && Mode.IMMEDIATE.equals(getRegister().getMode())) {
             isImmediate = true;
         }
 
@@ -220,7 +225,13 @@ public class Instruction {
         if (isImmediate) {
             builder.append("000");
         } else {
-            builder.append(register.getRegister().getRegisterCode());
+            if(register!=null){
+                builder.append(register.getRegister().getRegisterCode());
+            }
+            else{
+                builder.append("000");
+            }
+
         }
         if (mode == null) {
             builder.append("000");
@@ -316,7 +327,17 @@ public class Instruction {
 
     @Override
     public String toString() {
-        return opcode.toString() + " " + (getDestination() != null ? getDestination().toString() : "") + ", " + getSource().toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append(opcode.toString());
+        if(getDestination()!=null){
+            builder.append(' ');
+            builder.append(getDestination().toString());
+        }
+        if(getSource()!=null){
+            builder.append(", ");
+            builder.append(getSource().toString());
+        }
+        return builder.toString();
     }
 
     private static String readAndIncreaseAddress(byte[] bytes, MutableInt currentLocation) throws Exception {
