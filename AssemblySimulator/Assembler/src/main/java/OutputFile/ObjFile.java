@@ -38,20 +38,24 @@ public class ObjFile implements SupportTwoParsingPass {
         getCodeSegment().resetAfterFirstParsingPass(dataSegmentLength);
     }
 
-    public void dump(String filename) {
+    public void dump(String filename) throws Exception {
+        if (codeSegment == null) {
+            throw new Exception("must contain code segment");
+        }
+        LOGGER.info("Base address:     \t" + getCodeSegment().getBaseAddress());
+        LOGGER.info("Entry point:      \t" + getCodeSegment().getEntryPoint());
+        LOGGER.info("Entry procedure:  \t" + getCodeSegment().getEntryPointProcedure());
         try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(filename))) {
             dataOutputStream.writeInt(0X7f);// header, indicate this is a obj file
             dataOutputStream.writeInt(getCodeSegment().getBaseAddress());// base address
-            LOGGER.info("Base address:     \t"+getCodeSegment().getBaseAddress());
             dataOutputStream.writeInt(getCodeSegment().getEntryPoint());// entry address
-            LOGGER.info("Entry point:      \t"+getCodeSegment().getEntryPoint());
-            LOGGER.info("Entry procedure:  \t"+getCodeSegment().getEntryPointProcedure());
+
             byte[] data = BitSetUtils.toByteArray(getDataSegment().getData());
             byte[] code = BitSetUtils.toByteArray(getCodeSegment().getCode());
-            dataOutputStream.write(data,0,data.length);// data segment
-            dataOutputStream.write(code,0,code.length);// code segment
+            dataOutputStream.write(data, 0, data.length);// data segment
+            dataOutputStream.write(code, 0, code.length);// code segment
         } catch (Exception e) {
-            LOGGER.error(e);
+            throw e;
         }
     }
 }
