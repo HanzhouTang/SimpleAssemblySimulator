@@ -44,12 +44,13 @@ public class ObjFile implements SupportTwoParsingPass {
         }
         LOGGER.info("Base address:     \t" + getCodeSegment().getBaseAddress());
         LOGGER.info("Entry point:      \t" + getCodeSegment().getEntryPoint());
+        LOGGER.info("End point:        \t" + getCodeSegment().getEndPoint());
         LOGGER.info("Entry procedure:  \t" + getCodeSegment().getEntryPointProcedure());
         try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(filename))) {
             dataOutputStream.writeInt(0X7f);// header, indicate this is a obj file
             dataOutputStream.writeInt(getCodeSegment().getBaseAddress());// base address
             dataOutputStream.writeInt(getCodeSegment().getEntryPoint());// entry address
-
+            dataOutputStream.writeInt(getCodeSegment().getEndPoint());// end point
             byte[] data = BitSetUtils.toByteArray(getDataSegment().getData());
             byte[] code = BitSetUtils.toByteArray(getCodeSegment().getCode());
             dataOutputStream.write(data, 0, data.length);// data segment

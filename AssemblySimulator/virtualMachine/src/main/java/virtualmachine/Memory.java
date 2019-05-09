@@ -9,18 +9,25 @@ import java.util.List;
 @Component
 public class Memory {
 
-    private List<Byte> data = new ArrayList<>();
+    private byte[] data = null;
 
     void setData(List<Byte> data) {
-        this.data.clear();
-        this.data.addAll(data);
+        this.data = new byte[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            this.data[i] = data.get(i);
+        }
+
     }
 
     byte get(int location) {
-        return data.get(location);
+        return data[location];
+    }
+
+    byte[] getData() {
+        return data;
     }
 
     public int size() {
-        return data.size();
+        return data.length;
     }
 }

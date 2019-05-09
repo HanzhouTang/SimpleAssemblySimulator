@@ -6,6 +6,13 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Though the virtual machine will run different instructions in different thread,
+ * there's no need to use ConcurrentHashMap or any other synchronized mechanism.
+ * Because the virtual machine will strictly follow the Tomasulo’s algorithm which
+ * means at each clock cycle, only one instruction can modify the value of registers, except pc register.
+ * @author Hanzhou Tang
+ */
 @Component
 public class RegisterManager {
     private static Map<String, PhysicalRegister> registers = new HashMap<>();

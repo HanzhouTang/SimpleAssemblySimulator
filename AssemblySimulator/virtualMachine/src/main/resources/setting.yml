@@ -1,0 +1,6 @@
+machine:
+  loadMemoryNeededCycle: 3
+  saveMemoryNeededCycle: 3
+  reorderBufferSize: 50
+  executionTime:
+    nop: 1

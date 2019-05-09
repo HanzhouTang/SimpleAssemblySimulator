@@ -19,6 +19,7 @@ public class CodeSegment implements SupportTwoParsingPass {
     Map<String, Integer> labelTable = new HashMap<>();
     Map<String, Procedure> procedureTable = new HashMap<>();
     private int entryPoint;
+    private int endPoint;
     private String entryPointProcedure;
     private int baseAddress = 0;
 
@@ -30,13 +31,14 @@ public class CodeSegment implements SupportTwoParsingPass {
         return entryPointProcedure;
     }
 
-    public int getBaseAddress(){
+    public int getBaseAddress() {
         return baseAddress;
     }
 
-    public List<Byte> getCode(){
+    public List<Byte> getCode() {
         return code;
     }
+
     public void setEntryPoint(String entryPoint) throws Exception {
         if (procedureTable.containsKey(entryPoint)) {
             int result = procedureTable.get(entryPoint).getStart() + baseAddress;
@@ -46,6 +48,14 @@ public class CodeSegment implements SupportTwoParsingPass {
         } else {
             throw new Exception("the entry point " + entryPoint + " is not existed");
         }
+    }
+
+    public void setEndPoint() {
+        this.endPoint = baseAddress + code.size();
+    }
+
+    public int getEndPoint() {
+        return endPoint;
     }
 
     public int getProcedureEntryPoint(String procedure) {

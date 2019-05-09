@@ -4,7 +4,7 @@ import Instructions.Register;
 
 public class PhysicalRegister {
     private final String registerName;
-    private int content;
+    private volatile int content;
 
     public void setContent(int c) {
         content = c;

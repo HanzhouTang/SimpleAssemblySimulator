@@ -57,9 +57,9 @@ public class SimpleParser {
         if (!isEnd) {
             LOGGER.warn("warning: didn't find end directive. Cannot set entry point");
         }
-        if(procedureStack.size()>0){
+        if (procedureStack.size() > 0) {
             Procedure.PartialProcedure p = procedureStack.peek();
-            throw new Exception("the procedure <"+p.getName()+"> not end");
+            throw new Exception("the procedure <" + p.getName() + "> not end");
         }
         lexer.readFile(name); // reset the lexer.
         objFile.resetAfterFirstParsingPass();
@@ -154,7 +154,7 @@ public class SimpleParser {
         Token token = lexer.getNextToken();
         if (!t.equals(token)) {
             throw new Exception("Expected token <" + t + "> at line " + lexer.getStatus().getLineIndex() +
-                    ". However, got <" + token+">");
+                    ". However, got <" + token + ">");
         }
     }
 
@@ -469,7 +469,7 @@ public class SimpleParser {
                         return new Operand.Builder().immediate(location).build();
                     }
                     location = obj.getDataSegment().getLocationByName(str);
-                    if(location!=-1){
+                    if (location != -1) {
                         return new Operand.Builder().immediate(location).build();
                     }
                     throw new Exception("the label <" + str + "> at line " + wrapper.getLineIndex() + " is not existed");
@@ -488,8 +488,7 @@ public class SimpleParser {
             }
             return new Operand.Builder().immediate(number).build();
 
-        }
-        else if(Token.NewLine.equals(wrapper.getToken())){
+        } else if (Token.NewLine.equals(wrapper.getToken())) {
             return null;
             // for ret instruction who doesn't have any operands.
         }
@@ -583,6 +582,8 @@ public class SimpleParser {
                 String entryPoint = wrappers.get(1).getLexeme();
                 if (!firstPass) {
                     objFile.getCodeSegment().setEntryPoint(entryPoint);
+                    objFile.getCodeSegment().setEndPoint();
+                    // It's funny that set entry point and end point together.
                 }
             } else {
                 throw new Exception("must define entry point of code segment after end directive");
