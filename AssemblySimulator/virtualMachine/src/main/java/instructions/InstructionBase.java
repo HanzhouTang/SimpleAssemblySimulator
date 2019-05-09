@@ -30,9 +30,10 @@ public abstract class InstructionBase {
     private final int writeMemoryNeededCycle;
     private final int executionCycle;
     private final Instruction instruction;
-    private final int startCycle;
+    private Integer startCycle;
     private static Logger LOGGER = Logger.getLogger(InstructionBase.class);
     private final Mode mode;
+    private final InstructionBase lastInstructionStatus;
 
 
     public Mode getMode() {
@@ -51,7 +52,7 @@ public abstract class InstructionBase {
         return readMemoryNeededCycle;
     }
 
-    public int getStartCycle() {
+    public Integer getStartCycle() {
         return startCycle;
     }
 
@@ -63,23 +64,44 @@ public abstract class InstructionBase {
         return eventRecorder;
     }
 
+    public void setStartCycle(Integer startCycle) {
+        this.startCycle = startCycle;
+    }
 
-    protected InstructionBase(int startCycle, Queue<Message> q, int rc, int ec, int wc, Instruction ins) {
+    public InstructionBase getLastInstructionStatus() {
+        return lastInstructionStatus;
+    }
+
+    protected InstructionBase(Queue<Message> q, int rc, int ec, int wc, Instruction ins) {
         eventRecorder = q;
         readMemoryNeededCycle = rc;
         writeMemoryNeededCycle = wc;
         executionCycle = ec;
         instruction = ins;
-        this.startCycle = startCycle;
         if (instruction.getMemRegister() == null) {
             mode = null;
         } else {
             mode = instruction.getMemRegister().getMode();
         }
-        LOGGER.debug("mode " + mode + " for " + instruction);
+        lastInstructionStatus = null;
+        //LOGGER.debug("mode " + mode + " for " + instruction);
+    }
+
+
+    public InstructionBase(InstructionBase instructionBase) {
+        eventRecorder = instructionBase.getEventRecorder();
+        readMemoryNeededCycle = instructionBase.getReadMemoryNeededCycle();
+        writeMemoryNeededCycle = instructionBase.getWriteMemoryNeededCycle();
+        executionCycle = instructionBase.getExecutionCycle();
+        instruction = instructionBase.getInstruction();
+        mode = instructionBase.getMode();
+        lastInstructionStatus = instructionBase;
+        startCycle = instructionBase.getStartCycle();
     }
 
     abstract public Result executeInstruction();
+
+    abstract public InstructionBase copy();
 
     private Result execute_(final int cycle, final int finishCycle) {
         if (cycle < finishCycle) {
@@ -88,7 +110,7 @@ public abstract class InstructionBase {
         } else if (cycle == finishCycle) {
             LOGGER.debug("instruction " + instruction + " is executing in cycle " + cycle);
             eventRecorder.add(new Message("instruction " + instruction + " is executing in cycle " + cycle));
-            return null;
+            return executeInstruction();
         }
         return null;
     }

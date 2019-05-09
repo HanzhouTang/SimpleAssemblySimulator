@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import tomasulo.ReorderBuffer;
+import tomasulo.ReservationStation;
+import tomasulo.ReversedTable;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -44,12 +46,30 @@ public class VirtualMachine {
     VirtualMachineProperties setting;
 
     @Autowired
+    ReservationStation reservationStation;
+
+    @Autowired
     ReorderBuffer reorderBuffer;
+
+    @Autowired
+    ReversedTable reversedTable;
 
     int finalPoint = 0;
 
     Queue<Message> eventRecorder = new LinkedList<>();
     private static Logger LOGGER = Logger.getLogger(VirtualMachine.class);
+
+    public RegisterManager getRegisterManager() {
+        return registerManager;
+    }
+
+    public ReorderBuffer getReorderBuffer() {
+        return reorderBuffer;
+    }
+
+    public ReversedTable getReversedTable() {
+        return reversedTable;
+    }
 
     public Queue<Message> getEventRecorder() {
         return eventRecorder;
@@ -76,7 +96,7 @@ public class VirtualMachine {
             }
             memory.setData(data);
             PhysicalRegister pc = registerManager.getRegister("pc");
-            pc.setContent(entryPoint);
+            pc.setContent(entryPoint);// error: must set register by manger
             LOGGER.info("total read size:     \t" + memory.size());
             LOGGER.info("entry point address: \t" + pc.getContent());
             LOGGER.info("end point address:   \t" + finalPoint);
@@ -85,25 +105,36 @@ public class VirtualMachine {
         }
     }
 
+    public void sendMessage(String msg) {
+        eventRecorder.add(new Message(msg + " in cycle " + clockCycleCounter.getCurrentClockCycle()));
+        LOGGER.debug(msg + " in cycle " + clockCycleCounter.getCurrentClockCycle());
+    }
 
     public void run() throws Exception {
-        Instruction nextInstruction;
-        while ((nextInstruction = getNextInstruction()) != null) {
+        Instruction nextInstruction = getNextInstruction();
+        while (nextInstruction != null) {
+            if (issueInstruction(nextInstruction)) {
+                nextInstruction = getNextInstruction();
+            }
+            executeInstructions();
             clockCycleCounter.toNextClockCycle();
 
         }
     }
 
-    private void issueInstruction(Instruction instruction) throws Exception {
+    private void executeInstructions() {
+
+    }
+
+    private boolean issueInstruction(Instruction instruction) throws Exception {
         if (instruction == null) {
             throw new Exception("cannot issue a null instruction");
         } else {
             final int loadCycle = setting.getLoadMemoryNeededCycle();
             final int executionCycle = setting.getExecutionTime(instruction.getOpcode());
             final int saveCycle = setting.getSaveMemoryNeededCycle();
-            InstructionBase instructionBase = InstructionFactory.createInstruction(instruction, loadCycle, saveCycle, executionCycle, clockCycleCounter, eventRecorder);
-            eventRecorder.add(new Message("Issue instruction " + instruction + " in cycle " + clockCycleCounter.getCurrentClockCycle()));
-            LOGGER.debug("Issue instruction " + instruction + " in cycle " + clockCycleCounter.getCurrentClockCycle());
+            InstructionBase instructionBase = InstructionFactory.createInstruction(instruction, loadCycle, saveCycle, executionCycle, eventRecorder);
+            return reservationStation.issueInstruction(instructionBase, this);
         }
 
     }
@@ -114,7 +145,7 @@ public class VirtualMachine {
         if ((location = pc.getContent()) < finalPoint) {
             MutableInt loc = new MutableInt(location);
             Instruction instruction = Instruction.fromBytes(memory.getData(), loc);
-            pc.setContent(loc.getValue());
+            pc.setContent(loc.getValue());// error: must set register by manger
             eventRecorder.add(new Message("set pc register points to location " + pc.getContent()));
             LOGGER.debug("set pc register points to location " + pc.getContent());
             return instruction;

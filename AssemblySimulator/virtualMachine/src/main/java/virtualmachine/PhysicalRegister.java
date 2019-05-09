@@ -11,6 +11,7 @@ public class PhysicalRegister {
     }
 
     public int getContent() {
+        // do something specially for 16 bit and 8 bit register
         return content;
     }
 

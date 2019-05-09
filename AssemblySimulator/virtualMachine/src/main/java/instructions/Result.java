@@ -1,5 +1,8 @@
 package instructions;
 
+/**
+ * Every time, will create a new instruction from the old one.
+ */
 public class Result {
     private final Object result;
     private final InstructionBase instructionBase;
@@ -9,7 +12,7 @@ public class Result {
 
     public Result(Object o, InstructionBase instructionBase, ResultState s) {
         result = o;
-        this.instructionBase = instructionBase;
+        this.instructionBase = instructionBase.copy();
         state = s;
     }
 

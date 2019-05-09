@@ -15,7 +15,7 @@ public class InstructionFactoryTest {
     @Test
     public void getNopInstructionByFactory() throws Exception {
         Instruction nop = new Instruction(OpCode.NOP, null, null);
-        InstructionBase nopInstruction = InstructionFactory.createInstruction(nop, 0, 1, 1, new ClockCycleCounter(), null);
+        InstructionBase nopInstruction = InstructionFactory.createInstruction(nop, 0, 1, 1,  null);
         Assert.assertNotNull(nopInstruction);
         Assert.assertThat(nopInstruction, instanceOf(NopInstruction.class));
     }

@@ -12,6 +12,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import tomasulo.ReorderBuffer;
+import tomasulo.ReservationStation;
+import tomasulo.ReversedTable;
 import virtualmachine.*;
 
 import java.net.URI;
@@ -23,7 +25,8 @@ import java.util.concurrent.BlockingQueue;
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ClockCycleCounter.class, Memory.class,
-        RegisterManager.class, VirtualMachine.class, VirtualMachineProperties.class, ReorderBuffer.class})
+        RegisterManager.class, VirtualMachine.class, VirtualMachineProperties.class,
+        ReorderBuffer.class, ReservationStation.class, ReversedTable.class})
 public class virtualMachineTest {
 
     private static Logger LOGGER = Logger.getLogger(virtualMachineTest.class);

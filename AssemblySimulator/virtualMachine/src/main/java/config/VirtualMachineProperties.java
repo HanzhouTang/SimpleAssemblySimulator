@@ -22,6 +22,15 @@ public class VirtualMachineProperties {
     private Integer loadMemoryNeededCycle;
     private Integer saveMemoryNeededCycle;
     private Integer reorderBufferSize;
+    private Integer reservationStationSize;
+
+    public Integer getReservationStationSize() {
+        return reservationStationSize;
+    }
+
+    public void setReservationStationSize(Integer reservationStationSize) {
+        this.reservationStationSize = reservationStationSize;
+    }
 
     public Integer getReorderBufferSize() {
         return reorderBufferSize;
