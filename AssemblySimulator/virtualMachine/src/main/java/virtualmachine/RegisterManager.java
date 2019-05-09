@@ -19,6 +19,10 @@ public class RegisterManager {
 
     static {
         registers.put("pc", new PhysicalRegister("pc"));
+        registers.put("eax",new PhysicalRegister("eax"));
+        registers.put("ax",registers.get("eax"));
+        registers.put("al",registers.get("eax"));
+        registers.put("ah",registers.get("eax"));
     }
 
     public static PhysicalRegister getRegister_(Register r) {

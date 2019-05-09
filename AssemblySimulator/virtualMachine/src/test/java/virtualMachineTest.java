@@ -54,7 +54,7 @@ public class virtualMachineTest {
         Assert.assertEquals(1, virtualMachineProperties.getExecutionTime(OpCode.NOP).intValue());
     }
 
-    @Ignore
+
     @Test
     public void runNopInstruction() throws Exception {
         URI uri = getClass().getClassLoader().getResource("nop.obj").toURI();
@@ -63,8 +63,18 @@ public class virtualMachineTest {
         virtualMachine.loadObjFile(filename);
         virtualMachine.run();
         Queue<Message> q = virtualMachine.getEventRecorder();
-        Assert.assertEquals(1, q.size());
-        Assert.assertEquals("fda", q.peek().toString());
+        Assert.assertEquals(2, q.size());
+    }
+
+    @Test
+    public void run2NopInstruction() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("nop2.obj").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        virtualMachine.loadObjFile(filename);
+        virtualMachine.run();
+        Queue<Message> q = virtualMachine.getEventRecorder();
+        Assert.assertEquals(2, q.size());
     }
 
 

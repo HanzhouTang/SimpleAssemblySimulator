@@ -107,7 +107,12 @@ public class VirtualMachine {
 
     public void sendMessage(String msg) {
         eventRecorder.add(new Message(msg + " in cycle " + clockCycleCounter.getCurrentClockCycle()));
-        LOGGER.debug(msg + " in cycle " + clockCycleCounter.getCurrentClockCycle());
+        LOGGER.debug("===== " + msg + " in cycle " + clockCycleCounter.getCurrentClockCycle() + " =====");
+    }
+
+    public void sendMessage(Message msg) {
+        eventRecorder.add(msg);
+        LOGGER.debug("===== " + msg + " =====");
     }
 
     public void run() throws Exception {
@@ -146,8 +151,7 @@ public class VirtualMachine {
             MutableInt loc = new MutableInt(location);
             Instruction instruction = Instruction.fromBytes(memory.getData(), loc);
             pc.setContent(loc.getValue());// error: must set register by manger
-            eventRecorder.add(new Message("set pc register points to location " + pc.getContent()));
-            LOGGER.debug("set pc register points to location " + pc.getContent());
+            sendMessage("set pc register points to location " + pc.getContent());
             return instruction;
         }
         return null;
