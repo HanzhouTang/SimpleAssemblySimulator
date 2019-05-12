@@ -17,8 +17,9 @@ public class SibDependency extends Dependency {
     @SuppressWarnings("Duplicates")
     public Integer getNeededReorderBufferNumber(ReversedTable table, RegisterManager registerManager) {
         if (index != null) {
-            ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, index);
-            Integer result = table.getReversedBy(entry);
+            AddressEntry addressEntry = new AddressEntry(index);
+            //ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, index);
+            Integer result = table.getReversedBy(addressEntry);
             if (result != null) {
                 return result;
             } else {
@@ -28,8 +29,8 @@ public class SibDependency extends Dependency {
             }
         }
         if (base != null) {
-            ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, base);
-            Integer result = table.getReversedBy(entry);
+            AddressEntry addressEntry = new AddressEntry(base);// entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, base);
+            Integer result = table.getReversedBy(addressEntry);
             if (result != null) {
                 return result;
             } else {
@@ -41,8 +42,8 @@ public class SibDependency extends Dependency {
         if (address == null) {
             address = baseValue + indexValue * scale + displacement;
         }
-        ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.MEMORY, address, null);
-        return table.getReversedBy(entry);
+        AddressEntry addressEntry = new AddressEntry(address);//entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.MEMORY, address, null);
+        return table.getReversedBy(addressEntry);
 
     }
 

@@ -6,8 +6,10 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.log4j.Logger;
 import virtualmachine.ClockCycleCounter;
 import virtualmachine.Message;
+import virtualmachine.VirtualMachine;
 
 
+import javax.swing.plaf.PanelUI;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
@@ -25,12 +27,14 @@ import java.util.function.Supplier;
 
 @Immutable
 public abstract class InstructionBase {
-    private final Queue<Message> eventRecorder;
+    //private final Queue<Message> eventRecorder;
+    private final VirtualMachine virtualMachine;
     private final int readMemoryNeededCycle;
     private final int writeMemoryNeededCycle;
     private final int executionCycle;
     private final Instruction instruction;
     private Integer startCycle;
+    private Integer sourceValue;
     private static Logger LOGGER = Logger.getLogger(InstructionBase.class);
     private final Mode mode;
     private final InstructionBase lastInstructionStatus;
@@ -60,20 +64,28 @@ public abstract class InstructionBase {
         return writeMemoryNeededCycle;
     }
 
-    public Queue<Message> getEventRecorder() {
+    /*public Queue<Message> getEventRecorder() {
         return eventRecorder;
+    }*/
+
+    public Integer getSourceValue() {
+        return sourceValue;
     }
 
     public void setStartCycle(Integer startCycle) {
         this.startCycle = startCycle;
     }
 
+    public void setSourceValue(Integer value) {
+        sourceValue = value;
+    }
+
     public InstructionBase getLastInstructionStatus() {
         return lastInstructionStatus;
     }
 
-    protected InstructionBase(Queue<Message> q, int rc, int ec, int wc, Instruction ins) {
-        eventRecorder = q;
+    protected InstructionBase(VirtualMachine virtualMachine, int rc, int ec, int wc, Instruction ins) {
+        this.virtualMachine = virtualMachine;
         readMemoryNeededCycle = rc;
         writeMemoryNeededCycle = wc;
         executionCycle = ec;
@@ -89,7 +101,7 @@ public abstract class InstructionBase {
 
 
     public InstructionBase(InstructionBase instructionBase) {
-        eventRecorder = instructionBase.getEventRecorder();
+        virtualMachine = instructionBase.virtualMachine;
         readMemoryNeededCycle = instructionBase.getReadMemoryNeededCycle();
         writeMemoryNeededCycle = instructionBase.getWriteMemoryNeededCycle();
         executionCycle = instructionBase.getExecutionCycle();
@@ -97,6 +109,7 @@ public abstract class InstructionBase {
         mode = instructionBase.getMode();
         lastInstructionStatus = instructionBase;
         startCycle = instructionBase.getStartCycle();
+        sourceValue = instructionBase.getSourceValue();
     }
 
     abstract public Result executeInstruction();
@@ -105,11 +118,11 @@ public abstract class InstructionBase {
 
     private Result execute_(final int cycle, final int finishCycle) {
         if (cycle < finishCycle) {
-            LOGGER.debug("instruction " + instruction + " is executing in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is executing in cycle " + cycle));
+            //LOGGER.debug("instruction " + instruction + " is executing in cycle " + cycle);
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is executing in cycle " + cycle));
         } else if (cycle == finishCycle) {
-            LOGGER.debug("instruction " + instruction + " is executing in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is executing in cycle " + cycle));
+            //LOGGER.debug("instruction " + instruction + " is executing in cycle " + cycle);
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is executing in cycle " + cycle));
             return executeInstruction();
         }
         return null;
@@ -118,10 +131,10 @@ public abstract class InstructionBase {
     private Result read_(final int cycle, final int finishCycle) {
         if (cycle < finishCycle) {
             LOGGER.debug("instruction " + instruction + " is reading in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is reading in cycle " + cycle));
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is reading in cycle " + cycle));
         } else if (cycle == finishCycle) {
             LOGGER.debug("instruction " + instruction + " is reading in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is reading in cycle " + cycle));
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is reading in cycle " + cycle));
             return null;
         }
         return null;
@@ -130,10 +143,10 @@ public abstract class InstructionBase {
     private Result write_(final int cycle, final int finishCycle) {
         if (cycle < finishCycle) {
             LOGGER.debug("instruction " + instruction + " is writing in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is writing in cycle " + cycle));
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is writing in cycle " + cycle));
         } else if (cycle == finishCycle) {
             LOGGER.debug("instruction " + instruction + " is writing in cycle " + cycle);
-            eventRecorder.add(new Message("instruction " + instruction + " is writing in cycle " + cycle));
+            virtualMachine.sendMessage(new Message("instruction " + instruction + " is writing in cycle " + cycle));
             return null;
         }
         return null;

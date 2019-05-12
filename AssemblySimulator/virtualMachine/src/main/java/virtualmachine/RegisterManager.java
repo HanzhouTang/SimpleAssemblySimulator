@@ -40,4 +40,11 @@ public class RegisterManager {
     public PhysicalRegister getRegister(Register r) {
         return RegisterManager.getRegister_(r);
     }
+
+    public void setRegisterValue(String name, int value){
+
+    }
+    public void setRegisterValue(Register r, int value){
+
+    }
 }

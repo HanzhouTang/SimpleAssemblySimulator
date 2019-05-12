@@ -63,7 +63,7 @@ public class virtualMachineTest {
         virtualMachine.loadObjFile(filename);
         virtualMachine.run();
         Queue<Message> q = virtualMachine.getEventRecorder();
-        Assert.assertEquals(2, q.size());
+        Assert.assertEquals(3, q.size());
     }
 
     @Test
@@ -71,10 +71,11 @@ public class virtualMachineTest {
         URI uri = getClass().getClassLoader().getResource("nop2.obj").toURI();
         Assert.assertNotNull(uri);
         String filename = Paths.get(uri).toString();
+        virtualMachine.resetMessageQueue();
         virtualMachine.loadObjFile(filename);
         virtualMachine.run();
         Queue<Message> q = virtualMachine.getEventRecorder();
-        Assert.assertEquals(2, q.size());
+        Assert.assertEquals(6, q.size());
     }
 
 

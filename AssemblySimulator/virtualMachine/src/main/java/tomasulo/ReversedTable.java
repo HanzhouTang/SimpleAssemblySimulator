@@ -3,45 +3,38 @@ package tomasulo;
 import Instructions.Register;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class ReversedTable {
-    public enum KeyType {
-        MEMORY, REGISTER
-    }
 
     final private Map<Integer, Integer> memoryReversedTable = new HashMap<>();
     final private Map<Register, Integer> registerMapReversedTable = new HashMap<>();
 
-    public static class ReversedEntry {
-        final KeyType type;
-        final Integer memoryAddress;
-        final Register register;
-
-        public ReversedEntry(KeyType k, Integer i, Register r) {
-            type = k;
-            memoryAddress = i;
-            register = r;
+    void add(AddressEntry entry, Integer orderBufferNumber) {
+        if (AddressEntry.Type.MEMORY.equals(entry.getType())) {
+            memoryReversedTable.put(entry.getMemoryAddress(), orderBufferNumber);
+        } else if (AddressEntry.Type.REGISTER.equals(entry.getType())) {
+            registerMapReversedTable.put(entry.getRegister(), orderBufferNumber);
         }
     }
 
-    void add(ReversedEntry entry, Integer orderBufferNumber) {
-        if (KeyType.MEMORY.equals(entry.type)) {
-            memoryReversedTable.put(entry.memoryAddress, orderBufferNumber);
-        } else if (KeyType.REGISTER.equals(entry.type)) {
-            registerMapReversedTable.put(entry.register, orderBufferNumber);
-        }
-    }
-
-    Integer getReversedBy(ReversedEntry entry) {
-        if (KeyType.MEMORY.equals(entry.type)) {
-            return memoryReversedTable.get(entry.memoryAddress);
-        } else if (KeyType.REGISTER.equals(entry.type)) {
-            return registerMapReversedTable.get(entry.register);
+    Integer getReversedBy(AddressEntry entry) {
+        if (AddressEntry.Type.MEMORY.equals(entry.getType())) {
+            return memoryReversedTable.get(entry.getMemoryAddress());
+        } else if (AddressEntry.Type.REGISTER.equals(entry.getType())) {
+            return registerMapReversedTable.get(entry.getRegister());
         }
         return null;
     }
+
+    void remove(AddressEntry entry) {
+        if (AddressEntry.Type.MEMORY.equals(entry.getType())) {
+            memoryReversedTable.remove(entry.getMemoryAddress());
+        } else if (AddressEntry.Type.REGISTER.equals(entry.getType())) {
+            registerMapReversedTable.remove(entry.getRegister());
+        }
+    }
+
 }

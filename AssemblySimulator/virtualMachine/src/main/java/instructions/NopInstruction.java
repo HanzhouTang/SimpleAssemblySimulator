@@ -3,14 +3,15 @@ package instructions;
 import Instructions.Instruction;
 import virtualmachine.ClockCycleCounter;
 import virtualmachine.Message;
+import virtualmachine.VirtualMachine;
 
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 public class NopInstruction extends InstructionBase {
 
-    public NopInstruction(Queue<Message> q, int rc, int ec, int wc, Instruction ins) {
-        super(q, rc, ec, wc, ins);
+    public NopInstruction(VirtualMachine vm, int rc, int ec, int wc, Instruction ins) {
+        super(vm, rc, ec, wc, ins);
     }
 
     protected NopInstruction(InstructionBase nop) {

@@ -27,6 +27,10 @@ public class Memory {
         return data;
     }
 
+    public void set(int location, int value){
+    // need concern
+    }
+
     public int size() {
         return data.length;
     }

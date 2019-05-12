@@ -13,8 +13,9 @@ public class IndirectDependency extends Dependency {
     @SuppressWarnings("Duplicates")
     public Integer getNeededReorderBufferNumber(ReversedTable table, RegisterManager registerManager) {
         if (register != null) {
-            ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, register);
-            Integer result = table.getReversedBy(entry);
+            //ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, register);
+            AddressEntry addressEntry = new AddressEntry(register);
+            Integer result = table.getReversedBy(addressEntry);
             if (result != null) {
                 return result;
             } else {
@@ -27,8 +28,9 @@ public class IndirectDependency extends Dependency {
         if (address == null) {
             address = displacement + registerValue;
         }
-        ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.MEMORY, address, null);
-        return table.getReversedBy(entry);
+        //ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.MEMORY, address, null);
+        AddressEntry addressEntry = new AddressEntry(address);
+        return table.getReversedBy(addressEntry);
 
     }
 

@@ -50,6 +50,7 @@ public class ReservationStation {
 
 
         public ReservationStationEntry(final InstructionBase ins, Integer orderBufferNumber) {
+            // orderBufferNumber is the index of re-order buffer for source.
             instruction = ins;
             qj = orderBufferNumber;
         }
@@ -57,12 +58,16 @@ public class ReservationStation {
     // only affect read , write is ok.
 
     private final ReservationStationEntry[] table;
-    int head = 0;
+    //int head = 0;
     int size = 0;
 
     @Autowired
     public ReservationStation(VirtualMachineProperties properties) {
         table = new ReservationStationEntry[properties.getReservationStationSize()];
+    }
+
+    ReservationStationEntry get(int index) {
+        return table[index];
     }
 
     @SuppressWarnings("Duplicates")
@@ -72,55 +77,80 @@ public class ReservationStation {
         }
         ReorderBuffer reorderBuffer = vm.getReorderBuffer();
         ReversedTable reversedTable = vm.getReversedTable();
-        if (!reorderBuffer.add(instructionBase, vm)) {
+        int location = -1;
+        for (int i = 0; i < table.length; i++) {
+            if (table[i] == null) {
+                location = i;
+                break;
+
+            }
+        }
+
+        if (!reorderBuffer.add(instructionBase, vm, location)) {
             return false;
         }
-        int location = (head + size) % table.length;
         Instruction instruction = instructionBase.getInstruction();
         ReservationStationEntry reservationStationEntry = null;
         if (instructionBase.getInstruction().isFromMemToReg()) {
             Mode mode = instructionBase.getInstruction().getMemRegister().getMode();
             if (Mode.REGISTER.equals(mode)) {
                 Register register = instructionBase.getInstruction().getMemRegister().getRegister();
-                ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, register);
-                Integer number = reversedTable.getReversedBy(entry);
+                AddressEntry addressEntry = new AddressEntry(register);
+                Integer number = reversedTable.getReversedBy(addressEntry);
                 reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                 if (number == null) {
                     Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
                     reservationStationEntry.setVj(value);
                 }
             } else {
-                Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
-                if (dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager()) == null) {
-                    Integer memory = dependency.getAddress();
-                    ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.MEMORY, memory, null);
-                    Integer number = reversedTable.getReversedBy(entry);
+                if (instructionBase.getInstruction().getMemRegister() == null) {
+                    reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+                } else {
+                    Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
+                    Integer dependedReorderBufferIndex = null;
+                    if (dependency != null) {
+                        dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager());
+                        if (dependedReorderBufferIndex == null) {
+                            // the source address can be known, for example, if source is [eax] the eax is not reversed by others.
+                            Integer memory = dependency.getAddress();
+                            AddressEntry addressEntry = new AddressEntry(memory);
+                            Integer number = reversedTable.getReversedBy(addressEntry);
+                            // if some instruction will write to the address, for example, if source is [eax] eax = 1, check if some instruction is writing to [1]
+                            reservationStationEntry = new ReservationStationEntry(instructionBase, number);
+                            if (number == null) {
+                                Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
+                                reservationStationEntry.setVj(value);
+                            }
+                        } else {
+                            vm.sendMessage("The source address of instruction "
+                                    + instructionBase.getInstruction() +
+                                    " is depended on " + dependedReorderBufferIndex + ", cannot issue the instruction");
+                            reorderBuffer.removeLatestEntry();// remove from reorder buffer
+                            return false;
+                        }
+                    }
+
+                }
+
+
+            }
+        } else {
+            Operand source = instructionBase.getInstruction().getRegister();
+            if (source == null) {
+                reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+            } else {
+                if (Mode.IMMEDIATE.equals(source.getMode())) {
+                    reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+                    reservationStationEntry.setVj(source.getImmediate());
+                } else {
+                    Register register = source.getRegister();
+                    AddressEntry addressEntry = new AddressEntry(register);
+                    Integer number = reversedTable.getReversedBy(addressEntry);
                     reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                     if (number == null) {
                         Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
                         reservationStationEntry.setVj(value);
                     }
-                } else {
-                    vm.sendMessage("The source address of instruction "
-                            + instructionBase.getInstruction() +
-                            " is depended on others, cannot issue the instruction");
-                    reorderBuffer.removeLastestEntry();// remove from reorder buffer
-                    return false;
-                }
-            }
-        } else {
-            Operand source = instructionBase.getInstruction().getRegister();
-            if (Mode.IMMEDIATE.equals(source.getMode())) {
-                reservationStationEntry = new ReservationStationEntry(instructionBase, null);
-                reservationStationEntry.setVj(source.getImmediate());
-            } else {
-                Register register = source.getRegister();
-                ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, register);
-                Integer number = reversedTable.getReversedBy(entry);
-                reservationStationEntry = new ReservationStationEntry(instructionBase, number);
-                if (number == null) {
-                    Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
-                    reservationStationEntry.setVj(value);
                 }
             }
         }
@@ -130,7 +160,13 @@ public class ReservationStation {
         return true;
     }
 
-    public boolean isFull() {
+    boolean isFull() {
         return table.length == size;
     }
+
+    void removeEntry(int location) {
+        table[location] = null;
+        size--;
+    }
+
 }

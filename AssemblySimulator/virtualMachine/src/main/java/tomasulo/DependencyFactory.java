@@ -5,6 +5,9 @@ import Instructions.Operand;
 
 public class DependencyFactory {
     public static Dependency createDependency(Operand operand) {
+        if (operand == null) {
+            return null;
+        }
         if (Mode.INDIRECT.equals(operand.getMode()) ||
                 Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(operand.getMode())) {
             return new IndirectDependency(operand.getDisplacement(), operand.getBase());

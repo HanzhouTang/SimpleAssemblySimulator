@@ -71,8 +71,24 @@ public class VirtualMachine {
         return reversedTable;
     }
 
+    public ReservationStation getReservationStation() {
+        return reservationStation;
+    }
+
+    public ClockCycleCounter getClockCycleCounter() {
+        return clockCycleCounter;
+    }
+
+    public Memory getMemory() {
+        return memory;
+    }
+
     public Queue<Message> getEventRecorder() {
         return eventRecorder;
+    }
+
+    public void resetMessageQueue(){
+        eventRecorder.clear();
     }
 
     public void loadObjFile(String name) throws Exception {
@@ -107,28 +123,35 @@ public class VirtualMachine {
 
     public void sendMessage(String msg) {
         eventRecorder.add(new Message(msg + " in cycle " + clockCycleCounter.getCurrentClockCycle()));
-        LOGGER.debug("===== " + msg + " in cycle " + clockCycleCounter.getCurrentClockCycle() + " =====");
+        LOGGER.info("===== " + msg + " in cycle " + clockCycleCounter.getCurrentClockCycle() + " =====");
     }
 
     public void sendMessage(Message msg) {
         eventRecorder.add(msg);
-        LOGGER.debug("===== " + msg + " =====");
+        LOGGER.info("===== " + msg + " =====");
     }
 
     public void run() throws Exception {
         Instruction nextInstruction = getNextInstruction();
         while (nextInstruction != null) {
+            executeInstructions();
             if (issueInstruction(nextInstruction)) {
                 nextInstruction = getNextInstruction();
             }
-            executeInstructions();
             clockCycleCounter.toNextClockCycle();
+        }
+        runUntilReorderBufferIsEmpty();
+    }
 
+    private void runUntilReorderBufferIsEmpty() {
+        while (!reorderBuffer.isEmpty()) {
+            reorderBuffer.run(this);
+            clockCycleCounter.toNextClockCycle();
         }
     }
 
     private void executeInstructions() {
-
+        reorderBuffer.run(this);
     }
 
     private boolean issueInstruction(Instruction instruction) throws Exception {
@@ -138,7 +161,7 @@ public class VirtualMachine {
             final int loadCycle = setting.getLoadMemoryNeededCycle();
             final int executionCycle = setting.getExecutionTime(instruction.getOpcode());
             final int saveCycle = setting.getSaveMemoryNeededCycle();
-            InstructionBase instructionBase = InstructionFactory.createInstruction(instruction, loadCycle, saveCycle, executionCycle, eventRecorder);
+            InstructionBase instructionBase = InstructionFactory.createInstruction(instruction, loadCycle, saveCycle, executionCycle, this);
             return reservationStation.issueInstruction(instructionBase, this);
         }
 
