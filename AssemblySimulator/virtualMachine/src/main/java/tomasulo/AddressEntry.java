@@ -32,4 +32,12 @@ public class AddressEntry {
     public Register getRegister() {
         return register;
     }
+
+    @Override
+    public String toString() {
+        if (Type.REGISTER.equals(type)) {
+            return register.toString();
+        }
+        return memoryAddress.toString();
+    }
 }

@@ -13,7 +13,7 @@ import virtualmachine.VirtualMachine;
 @Component
 public class ReservationStation {
 
-    public class ReservationStationEntry {
+    public static class ReservationStationEntry {
         boolean isBusy;
         final InstructionBase instruction;
         Integer vj;
@@ -69,6 +69,9 @@ public class ReservationStation {
     ReservationStationEntry get(int index) {
         return table[index];
     }
+    void set(int index, ReservationStationEntry entry){
+        table[index] = entry;
+    }
 
     @SuppressWarnings("Duplicates")
     public boolean issueInstruction(InstructionBase instructionBase, VirtualMachine vm) throws Exception {
@@ -112,13 +115,13 @@ public class ReservationStation {
                         dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager());
                         if (dependedReorderBufferIndex == null) {
                             // the source address can be known, for example, if source is [eax] the eax is not reversed by others.
-                            Integer memory = dependency.getAddress();
-                            AddressEntry addressEntry = new AddressEntry(memory);
+                            Integer memoryAddress = dependency.getAddress();
+                            AddressEntry addressEntry = new AddressEntry(memoryAddress);
                             Integer number = reversedTable.getReversedBy(addressEntry);
                             // if some instruction will write to the address, for example, if source is [eax] eax = 1, check if some instruction is writing to [1]
                             reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                             if (number == null) {
-                                Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
+                                Integer value = memoryAddress;
                                 reservationStationEntry.setVj(value);
                             }
                         } else {

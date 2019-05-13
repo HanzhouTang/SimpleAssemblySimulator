@@ -5,3 +5,5 @@ machine:
   reservationStationSize: 50
   executionTime:
     nop: 1
+    add: 3
+    mov: 2

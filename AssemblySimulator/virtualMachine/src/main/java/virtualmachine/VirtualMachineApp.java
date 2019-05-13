@@ -27,6 +27,7 @@ public class VirtualMachineApp implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         LOGGER.info("init virtual machine ...");
+        LOGGER.warn("For know, the virtual machine only support 32 bits registers.");
         if (args.length == 1) {
             String objFileName = args[0];
             virtualMachine.loadObjFile(objFileName);

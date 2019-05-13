@@ -138,19 +138,21 @@ public class VirtualMachine {
             if (issueInstruction(nextInstruction)) {
                 nextInstruction = getNextInstruction();
             }
+            Thread.sleep(300);
             clockCycleCounter.toNextClockCycle();
         }
         runUntilReorderBufferIsEmpty();
     }
 
-    private void runUntilReorderBufferIsEmpty() {
+    private void runUntilReorderBufferIsEmpty() throws Exception{
         while (!reorderBuffer.isEmpty()) {
             reorderBuffer.run(this);
+            Thread.sleep(300);
             clockCycleCounter.toNextClockCycle();
         }
     }
 
-    private void executeInstructions() {
+    private void executeInstructions() throws Exception {
         reorderBuffer.run(this);
     }
 
@@ -164,7 +166,6 @@ public class VirtualMachine {
             InstructionBase instructionBase = InstructionFactory.createInstruction(instruction, loadCycle, saveCycle, executionCycle, this);
             return reservationStation.issueInstruction(instructionBase, this);
         }
-
     }
 
     public Instruction getNextInstruction() throws Exception {

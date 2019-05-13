@@ -93,12 +93,14 @@ public class ReorderBuffer {
 
 
     @SuppressWarnings("Duplicates")
-    public void run(VirtualMachine vm) {
+    public void run(VirtualMachine vm) throws Exception {
         ReservationStation reservationStation = vm.getReservationStation();
         int loc = head % buffer.length;
         if (size > 0 && ReorderBufferState.WAIT_COMMIT.equals(buffer[loc].state)) {
             ReorderBufferEntry entry = buffer[loc];
             ReorderBufferEntry new_entry = new ReorderBufferEntry(null, false, entry.result, ReorderBufferState.COMMIT, entry.reservationIndex, entry.dest);
+            vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is committed");
+            LOGGER.info("entry destination " + entry.dest);
             buffer[loc] = new_entry;
             if (entry.result != null && entry.result.getResult() != null) {
                 if (AddressEntry.Type.REGISTER.equals(entry.dest.getType())) {
@@ -111,6 +113,10 @@ public class ReorderBuffer {
                 ReversedTable reversedTable = vm.getReversedTable();
                 reversedTable.remove(entry.dest);
             }
+            ReservationStation.ReservationStationEntry oldEntry = reservationStation.get(entry.reservationIndex);
+            ReservationStation.ReservationStationEntry newEntry = new ReservationStation.ReservationStationEntry(entry.executedInstruction, null);
+            newEntry.setVj(entry.result.getResult());
+            reservationStation.set(entry.reservationIndex, newEntry);
             removeFirstEntry();
         }
         for (int i = 0; i < size; i++) {
@@ -128,7 +134,8 @@ public class ReorderBuffer {
                         Result r = entry.executedInstruction.execute(vm.getClockCycleCounter().getCurrentClockCycle());
                         InstructionBase next = r == null ? null : r.getInstructionBase();
                         if (next == null) {
-                            new_entry = new ReorderBufferEntry(null, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
+                            vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is wait for commit");
+                            new_entry = new ReorderBufferEntry(entry.executedInstruction, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
                         } else {
                             new_entry = new ReorderBufferEntry(next, true, r, ReorderBufferState.EXEC, entry.reservationIndex, entry.dest);
                         }
@@ -138,9 +145,10 @@ public class ReorderBuffer {
                     }
                 } else {
                     Result r = entry.executedInstruction.execute(vm.getClockCycleCounter().getCurrentClockCycle());
-                    InstructionBase next = r.getInstructionBase();
+                    InstructionBase next = r == null ? null : r.getInstructionBase();
                     if (next == null) {
-                        new_entry = new ReorderBufferEntry(null, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
+                        new_entry = new ReorderBufferEntry(entry.executedInstruction, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
+                        vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is wait for commit");
                     } else {
                         new_entry = new ReorderBufferEntry(next, true, r, ReorderBufferState.EXEC, entry.reservationIndex, entry.dest);
                     }
@@ -174,7 +182,7 @@ public class ReorderBuffer {
         return buffer.length == size;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return size == 0;
     }
 }

@@ -1,6 +1,7 @@
 package tomasulo;
 
 import Instructions.Register;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.Map;
 
 @Component
 public class ReversedTable {
-
+    private static Logger LOGGER = Logger.getLogger(ReversedTable.class);
     final private Map<Integer, Integer> memoryReversedTable = new HashMap<>();
     final private Map<Register, Integer> registerMapReversedTable = new HashMap<>();
 

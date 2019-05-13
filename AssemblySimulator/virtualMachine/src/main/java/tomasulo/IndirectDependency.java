@@ -24,6 +24,8 @@ public class IndirectDependency extends Dependency {
                 }
                 // only read in first time
             }
+        } else {
+            registerValue = 0;
         }
         if (address == null) {
             address = displacement + registerValue;

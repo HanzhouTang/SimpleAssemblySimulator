@@ -78,5 +78,17 @@ public class virtualMachineTest {
         Assert.assertEquals(6, q.size());
     }
 
+    @Test
+    public void runAddInstruction() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("add_.obj").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        virtualMachine.resetMessageQueue();
+        virtualMachine.loadObjFile(filename);
+        virtualMachine.run();
+        Queue<Message> q = virtualMachine.getEventRecorder();
+        Assert.assertEquals(6, q.size());
+    }
+
 
 }

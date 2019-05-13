@@ -11,6 +11,7 @@ import java.util.Map;
  * there's no need to use ConcurrentHashMap or any other synchronized mechanism.
  * Because the virtual machine will strictly follow the Tomasulo’s algorithm which
  * means at each clock cycle, only one instruction can modify the value of registers, except pc register.
+ *
  * @author Hanzhou Tang
  */
 @Component
@@ -19,10 +20,14 @@ public class RegisterManager {
 
     static {
         registers.put("pc", new PhysicalRegister("pc"));
-        registers.put("eax",new PhysicalRegister("eax"));
-        registers.put("ax",registers.get("eax"));
-        registers.put("al",registers.get("eax"));
-        registers.put("ah",registers.get("eax"));
+        registers.put("eax", new PhysicalRegister("eax"));
+        registers.put("ecx", new PhysicalRegister("ecx"));
+        registers.put("ebx", new PhysicalRegister("ebx"));
+        registers.put("edx", new PhysicalRegister("edx"));
+        registers.put("esp", new PhysicalRegister("esp"));
+        registers.put("ebp", new PhysicalRegister("ebp"));
+        registers.put("esi", new PhysicalRegister("esi"));
+        registers.put("edi", new PhysicalRegister("edi"));
     }
 
     public static PhysicalRegister getRegister_(Register r) {
@@ -41,10 +46,11 @@ public class RegisterManager {
         return RegisterManager.getRegister_(r);
     }
 
-    public void setRegisterValue(String name, int value){
-
+    public void setRegisterValue(String name, int value) {
+        getRegister(name).setContent(value);
     }
-    public void setRegisterValue(Register r, int value){
 
+    public void setRegisterValue(Register r, int value) throws Exception {
+        getRegister(r).setContent(value);
     }
 }

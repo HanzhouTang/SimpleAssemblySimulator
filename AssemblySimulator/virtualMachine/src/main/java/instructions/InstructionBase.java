@@ -35,7 +35,7 @@ public abstract class InstructionBase {
     private final Instruction instruction;
     private Integer startCycle;
     private Integer sourceValue;
-    private static Logger LOGGER = Logger.getLogger(InstructionBase.class);
+    protected static Logger LOGGER = Logger.getLogger(InstructionBase.class);
     private final Mode mode;
     private final InstructionBase lastInstructionStatus;
 
@@ -125,7 +125,7 @@ public abstract class InstructionBase {
             virtualMachine.sendMessage(new Message("instruction " + instruction + " is executing in cycle " + cycle));
             return executeInstruction();
         }
-        return null;
+        return new Result(null, null, Result.ResultState.EXECUTING);
     }
 
     private Result read_(final int cycle, final int finishCycle) {
@@ -135,9 +135,11 @@ public abstract class InstructionBase {
         } else if (cycle == finishCycle) {
             LOGGER.debug("instruction " + instruction + " is reading in cycle " + cycle);
             virtualMachine.sendMessage(new Message("instruction " + instruction + " is reading in cycle " + cycle));
-            return null;
+            return new Result(null, copy(), Result.ResultState.READ_COMPLETE);
         }
-        return null;
+        Result result = new Result(null, copy(), Result.ResultState.READING);
+        return result;
+
     }
 
     private Result write_(final int cycle, final int finishCycle) {
@@ -147,15 +149,17 @@ public abstract class InstructionBase {
         } else if (cycle == finishCycle) {
             LOGGER.debug("instruction " + instruction + " is writing in cycle " + cycle);
             virtualMachine.sendMessage(new Message("instruction " + instruction + " is writing in cycle " + cycle));
-            return null;
+            return new Result(null, copy(), Result.ResultState.WRITE_COMPLETE);
         }
-        return null;
+        Result result = new Result(null, copy(), Result.ResultState.WRITING);
+        return result;
+        // now we need find a way to pass result from reading to writing
     }
 
 
     public Result execute(final int cycle) {
         if (Mode.SIB_DISPLACEMENT_FOLLOWED.equals(mode) || Mode.SIB.equals(mode)
-                || Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(mode) || Mode.INDIRECT.equals(mode)) {
+                || Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(mode) || Mode.INDIRECT.equals(mode) || Mode.DISPLACEMENT_ONLY.equals(mode)) {
             if (instruction.isFromMemToReg()) {
 
                 final int readCycle = startCycle + readMemoryNeededCycle;
