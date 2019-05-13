@@ -19,7 +19,7 @@ public class NopInstruction extends InstructionBase {
     }
 
     @Override
-    final public Result executeInstruction() {
+    final public Result executeInstruction() throws Exception{
         return new Result(null, null, Result.ResultState.EXEC_COMPLETE);
     }
 

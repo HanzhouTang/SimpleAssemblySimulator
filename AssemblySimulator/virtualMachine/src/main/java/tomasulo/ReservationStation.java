@@ -121,7 +121,11 @@ public class ReservationStation {
                             // if some instruction will write to the address, for example, if source is [eax] eax = 1, check if some instruction is writing to [1]
                             reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                             if (number == null) {
-                                Integer value = memoryAddress;
+                                /* read from memory */
+                                /* we pretend that the virtual machine has read or write phase. However, in fact, it doesn't. */
+                                /* for now, we assume every operand is 32 bits*/
+                                Integer value = vm.getMemory().get32(memoryAddress);
+                                        //memoryAddress;
                                 reservationStationEntry.setVj(value);
                             }
                         } else {

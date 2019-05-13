@@ -92,6 +92,12 @@ public class ReorderBuffer {
     }
 
 
+    /**
+     * I should check if finished by status
+     *
+     * @param vm
+     * @throws Exception
+     */
     @SuppressWarnings("Duplicates")
     public void run(VirtualMachine vm) throws Exception {
         ReservationStation reservationStation = vm.getReservationStation();
@@ -100,7 +106,7 @@ public class ReorderBuffer {
             ReorderBufferEntry entry = buffer[loc];
             ReorderBufferEntry new_entry = new ReorderBufferEntry(null, false, entry.result, ReorderBufferState.COMMIT, entry.reservationIndex, entry.dest);
             vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is committed");
-            LOGGER.info("entry destination " + entry.dest);
+            //LOGGER.info("entry destination " + entry.dest);
             buffer[loc] = new_entry;
             if (entry.result != null && entry.result.getResult() != null) {
                 if (AddressEntry.Type.REGISTER.equals(entry.dest.getType())) {
@@ -126,6 +132,7 @@ public class ReorderBuffer {
                 ReorderBufferEntry new_entry = null;
                 if (ReorderBufferState.WAIT_EXEC.equals(entry.state) || ReorderBufferState.ISSUE.equals(entry.state)) {
                     ReservationStation.ReservationStationEntry reservationStationEntry = reservationStation.get(entry.reservationIndex);
+                    // For now, if qj equals to null, start execution.
                     if (reservationStationEntry.getQj() == null) {
                         entry.executedInstruction.setSourceValue(reservationStationEntry.getVj());
                         // reservationStationEntry become useless
@@ -133,7 +140,7 @@ public class ReorderBuffer {
                         entry.executedInstruction.setStartCycle(vm.getClockCycleCounter().getCurrentClockCycle());
                         Result r = entry.executedInstruction.execute(vm.getClockCycleCounter().getCurrentClockCycle());
                         InstructionBase next = r == null ? null : r.getInstructionBase();
-                        if (next == null) {
+                        if (r == null || Result.ResultState.COMPLETE.equals(r.getState())) {
                             vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is wait for commit");
                             new_entry = new ReorderBufferEntry(entry.executedInstruction, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
                         } else {
@@ -146,7 +153,7 @@ public class ReorderBuffer {
                 } else {
                     Result r = entry.executedInstruction.execute(vm.getClockCycleCounter().getCurrentClockCycle());
                     InstructionBase next = r == null ? null : r.getInstructionBase();
-                    if (next == null) {
+                    if (r == null || Result.ResultState.COMPLETE.equals(r.getState())) {
                         new_entry = new ReorderBufferEntry(entry.executedInstruction, false, r, ReorderBufferState.WAIT_COMMIT, entry.reservationIndex, entry.dest);
                         vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is wait for commit");
                     } else {

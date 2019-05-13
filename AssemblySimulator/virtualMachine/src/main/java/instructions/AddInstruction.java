@@ -13,9 +13,11 @@ public class AddInstruction extends InstructionBase {
     }
 
     @Override
-    final public Result executeInstruction() {
-        LOGGER.info("source value " + getSourceValue());
-        return new Result(null, copy(), Result.ResultState.EXEC_COMPLETE);
+    final public Result executeInstruction() throws Exception {
+        LOGGER.debug("source value " + getSourceValue() + " for instruction " + getInstruction());
+        int destinationValue = getDestinationValue();
+        int result = destinationValue + getSourceValue();
+        return new Result(result, copyWithResult(result), Result.ResultState.EXEC_COMPLETE);
     }
 
     @Override

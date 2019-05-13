@@ -53,4 +53,8 @@ public class RegisterManager {
     public void setRegisterValue(Register r, int value) throws Exception {
         getRegister(r).setContent(value);
     }
+
+    public void reset() {
+        registers.forEach((k, v) -> v.setContent(0));
+    }
 }

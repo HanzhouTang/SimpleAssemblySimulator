@@ -91,6 +91,11 @@ public class VirtualMachine {
         eventRecorder.clear();
     }
 
+    public void reset(){
+        resetMessageQueue();
+        getRegisterManager().reset();
+    }
+
     public void loadObjFile(String name) throws Exception {
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(name))) {
             int checker = dataInputStream.readInt();
@@ -131,6 +136,7 @@ public class VirtualMachine {
         LOGGER.info("===== " + msg + " =====");
     }
 
+
     public void run() throws Exception {
         Instruction nextInstruction = getNextInstruction();
         while (nextInstruction != null) {
@@ -147,7 +153,7 @@ public class VirtualMachine {
     private void runUntilReorderBufferIsEmpty() throws Exception{
         while (!reorderBuffer.isEmpty()) {
             reorderBuffer.run(this);
-            Thread.sleep(300);
+            //Thread.sleep(300);
             clockCycleCounter.toNextClockCycle();
         }
     }

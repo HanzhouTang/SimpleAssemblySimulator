@@ -8,12 +8,16 @@ public class Result {
     private final InstructionBase instructionBase;
     private final ResultState state;
 
-    enum ResultState {READ_COMPLETE, EXEC_COMPLETE, WRITE_COMPLETE, EXECUTING, READING, WRITING}
+    public enum ResultState {READ_COMPLETE, EXEC_COMPLETE, WRITE_COMPLETE, EXECUTING, READING, WRITING,COMPLETE}
 
     public Result(Integer o, InstructionBase instructionBase, ResultState s) {
         result = o;
         this.instructionBase = instructionBase;
         state = s;
+    }
+
+    public ResultState getState() {
+        return state;
     }
 
     public InstructionBase getInstructionBase() {
