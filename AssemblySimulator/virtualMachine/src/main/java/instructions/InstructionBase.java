@@ -8,15 +8,8 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.log4j.Logger;
 import tomasulo.Dependency;
 import tomasulo.DependencyFactory;
-import virtualmachine.ClockCycleCounter;
 import virtualmachine.Message;
 import virtualmachine.VirtualMachine;
-
-
-import javax.swing.plaf.PanelUI;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.function.Supplier;
 
 /**
  * The base class of instruction. It implement Runable interface.
@@ -42,7 +35,7 @@ public abstract class InstructionBase {
     protected Integer result = null;
     protected static Logger LOGGER = Logger.getLogger(InstructionBase.class);
     private final Mode mode;
-    private final InstructionBase lastInstructionStatus;
+
 
 
     public Mode getMode() {
@@ -83,7 +76,7 @@ public abstract class InstructionBase {
         if (Mode.SIB_DISPLACEMENT_FOLLOWED.equals(dest_mode) || Mode.SIB.equals(dest_mode)
                 || Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(dest_mode) || Mode.INDIRECT.equals(dest_mode) || Mode.DISPLACEMENT_ONLY.equals(dest_mode)) {
             Dependency dependency = DependencyFactory.createDependency(destination);
-            dependency.getNeededReorderBufferNumber(virtualMachine.getReversedTable(), virtualMachine.getRegisterManager());
+            dependency.getNeededReorderBufferNumber(virtualMachine.getReservedTable(), virtualMachine.getRegisterManager());
             int mem = dependency.getAddress();
             return virtualMachine.getMemory().get32(mem);
         } else {
@@ -91,9 +84,6 @@ public abstract class InstructionBase {
             return virtualMachine.getRegisterManager().getRegister(r).getContent();
         }
     }
-    /*public Queue<Message> getEventRecorder() {
-        return eventRecorder;
-    }*/
 
     public Integer getSourceValue() {
         return sourceValue;
@@ -107,9 +97,6 @@ public abstract class InstructionBase {
         sourceValue = value;
     }
 
-    public InstructionBase getLastInstructionStatus() {
-        return lastInstructionStatus;
-    }
 
     protected InstructionBase(VirtualMachine virtualMachine, int rc, int ec, int wc, Instruction ins) {
         this.virtualMachine = virtualMachine;
@@ -122,7 +109,7 @@ public abstract class InstructionBase {
         } else {
             mode = instruction.getMemRegister().getMode();
         }
-        lastInstructionStatus = null;
+
         //LOGGER.debug("mode " + mode + " for " + instruction);
     }
 
@@ -134,7 +121,6 @@ public abstract class InstructionBase {
         executionCycle = instructionBase.getExecutionCycle();
         instruction = instructionBase.getInstruction();
         mode = instructionBase.getMode();
-        lastInstructionStatus = instructionBase;
         startCycle = instructionBase.getStartCycle();
         sourceValue = instructionBase.getSourceValue();
     }

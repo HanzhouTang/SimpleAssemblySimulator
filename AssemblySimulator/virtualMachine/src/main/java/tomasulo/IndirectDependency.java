@@ -11,7 +11,7 @@ public class IndirectDependency extends Dependency {
 
     @Override
     @SuppressWarnings("Duplicates")
-    public Integer getNeededReorderBufferNumber(ReversedTable table, RegisterManager registerManager) {
+    public Integer getNeededReorderBufferNumber(ReservedTable table, RegisterManager registerManager) {
         if (register != null) {
             //ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, register);
             AddressEntry addressEntry = new AddressEntry(register);

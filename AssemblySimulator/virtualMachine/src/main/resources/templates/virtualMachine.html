@@ -1,0 +1,144 @@
+<html>
+
+<head>
+    <title>${title}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <a href="${previousUrl}"><button type="button" class="btn btn-dark">previous</button></a>
+        <a href="${nextUrl}"><button type="button" class="btn btn-success pull-right">next</button></a>
+        <h1>Messages</h1>
+        <#list msgs as msg>
+            <div class="alert alert-info">
+                <strong>Info!</strong> ${msg}
+            </div>
+        </#list>
+
+
+        <table class="table">
+            <caption>
+                <h1>Register</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Register</th>
+                    <th scope="col">Content</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list registers as register>
+                    <tr>
+                        <td>${register.name}</td>
+                        <td>${register.value}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+
+        <table class="table">
+            <caption>
+                <h1>Reorder Buffer</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Index</th>
+                    <th scope="col">Busy</th>
+                    <th scope="col">Reorder Buffer State</th>
+                    <th scope="col">Reservation Table Index</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list reorderBufferTable as entry>
+                    <tr>
+                        <td>${entry.index}</td>
+                        <td>${entry.busy}</td>
+                        <td>${entry.reorderBufferState}</td>
+                        <td>${entry.reservationIndex}</td>
+                        <td>${entry.address}</td>
+                        <td>${entry.result}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+
+
+        <table class="table">
+            <caption>
+                <h1>reservation station</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Index</th>
+                    <th scope="col">Busy</th>
+                    <th scope="col">Instruction</th>
+                    <th scope="col">Vj</th>
+                    <th scope="col">Qj</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list reservationStationTable as entry>
+                    <tr>
+                        <td>${entry.index}</td>
+                        <td>${entry.busy}</td>
+                        <td>${entry.instruction}</td>
+                        <td>${entry.vj}</td>
+                        <td>${entry.qj}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+
+
+        <table class="table">
+            <caption>
+                <h1>Register reversed table</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Register</th>
+                    <th scope="col">Reorder buffer index</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list registerReservedTable as entry>
+                    <tr>
+                        <td>${entry.key}</td>
+                        <td>#${entry.value}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+
+
+        <table class="table">
+            <caption>
+                <h1>Memory reversed table</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Memory Address</th>
+                    <th scope="col">Reorder buffer index</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list memoryReservedTable as entry>
+                    <tr>
+                        <td>${entry.key}</td>
+                        <td>#${entry.value}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+
+</html>

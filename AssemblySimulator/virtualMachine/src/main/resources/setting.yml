@@ -1,4 +1,5 @@
 machine:
+  outputDir: C:\Users\tangh\source\repos\AssemblySimulator\AssemblySimulator\virtualMachine\out\test\renderResult
   loadMemoryNeededCycle: 3
   saveMemoryNeededCycle: 3
   reorderBufferSize: 50

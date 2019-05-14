@@ -23,6 +23,15 @@ public class VirtualMachineProperties {
     private Integer saveMemoryNeededCycle;
     private Integer reorderBufferSize;
     private Integer reservationStationSize;
+    private String outputDir;
+
+    public String getOutputDir() {
+        return outputDir;
+    }
+
+    public void setOutputDir(String dir) {
+        outputDir = dir;
+    }
 
     public Integer getReservationStationSize() {
         return reservationStationSize;

@@ -6,10 +6,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
-public class ReversedTable {
-    private static Logger LOGGER = Logger.getLogger(ReversedTable.class);
+public class ReservedTable {
+    private static Logger LOGGER = Logger.getLogger(ReservedTable.class);
     final private Map<Integer, Integer> memoryReversedTable = new HashMap<>();
     final private Map<Register, Integer> registerMapReversedTable = new HashMap<>();
 
@@ -38,4 +39,11 @@ public class ReversedTable {
         }
     }
 
+    public Set<Map.Entry<Integer, Integer>> memoryToSet() {
+        return memoryReversedTable.entrySet();
+    }
+
+    public Set<Map.Entry<Register, Integer>> registerToSet() {
+        return registerMapReversedTable.entrySet();
+    }
 }

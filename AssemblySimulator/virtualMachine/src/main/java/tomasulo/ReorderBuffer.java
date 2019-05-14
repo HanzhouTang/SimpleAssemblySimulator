@@ -8,21 +8,25 @@ import instructions.Result;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import render.Render;
 import virtualmachine.VirtualMachine;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ReorderBuffer {
     private static Logger LOGGER = Logger.getLogger(ReorderBuffer.class);
 
-    enum ReorderBufferState {EXEC, WAIT_EXEC, ISSUE, COMMIT, WAIT_COMMIT}
+    public enum ReorderBufferState {EXEC, WAIT_EXEC, ISSUE, COMMIT, WAIT_COMMIT}
 
     public static class ReorderBufferEntry {
-        final InstructionBase executedInstruction;
-        boolean isBusy = false;
-        final Result result;
-        final ReorderBufferState state;
-        final int reservationIndex;
-        final AddressEntry dest;
+        public final InstructionBase executedInstruction;
+        public boolean isBusy = false;
+        public final Result result;
+        public final ReorderBufferState state;
+        public final int reservationIndex;
+        public final AddressEntry dest;
 
         public ReorderBufferEntry(InstructionBase ins, boolean b, Result r, ReorderBufferState s, int reservationIndex, final AddressEntry dest) {
             executedInstruction = ins;
@@ -51,12 +55,12 @@ public class ReorderBuffer {
             return false;
         }
         AddressEntry dest = null;
-        ReversedTable reversedTable = vm.getReversedTable();
+        ReservedTable reservedTable = vm.getReservedTable();
         Mode mode = instructionBase.getMode();
         if (instructionBase.getInstruction().isFromMemToReg()) {
             Register register = instructionBase.getInstruction().getRegister().getRegister();
             dest = new AddressEntry(register);
-            reversedTable.add(dest, size);
+            reservedTable.add(dest, size);
         } else {
             Mode memRegMode = null;
             if (instructionBase.getInstruction().getMemRegister() != null) {
@@ -65,16 +69,16 @@ public class ReorderBuffer {
             if (Mode.REGISTER.equals(memRegMode)) {
                 Register register = instructionBase.getInstruction().getMemRegister().getRegister();
                 dest = new AddressEntry(register);
-                reversedTable.add(dest, size);
+                reservedTable.add(dest, size);
             } else {
                 Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
                 Integer dependedReorderBufferIndex = null;
                 if (dependency != null) {
-                    dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager());
+                    dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reservedTable, vm.getRegisterManager());
                     if (dependedReorderBufferIndex == null) {
                         Integer memory = dependency.getAddress();
                         dest = new AddressEntry(memory);
-                        reversedTable.add(dest, size);
+                        reservedTable.add(dest, size);
                     } else {
                         vm.sendMessage("The destination address of instruction "
                                 + instructionBase.getInstruction() +
@@ -116,8 +120,8 @@ public class ReorderBuffer {
                 }
             }
             if (entry.dest != null) {
-                ReversedTable reversedTable = vm.getReversedTable();
-                reversedTable.remove(entry.dest);
+                ReservedTable reservedTable = vm.getReservedTable();
+                reservedTable.remove(entry.dest);
             }
             ReservationStation.ReservationStationEntry oldEntry = reservationStation.get(entry.reservationIndex);
             ReservationStation.ReservationStationEntry newEntry = new ReservationStation.ReservationStationEntry(entry.executedInstruction, null);
@@ -191,5 +195,14 @@ public class ReorderBuffer {
 
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    public List<Render.ReorderBufferEntryWrapper> toList() {
+        List<Render.ReorderBufferEntryWrapper> ret = new ArrayList<>();
+        for (int i = 0; i < buffer.length; i++) {
+            Render.ReorderBufferEntryWrapper wrapper = new Render.ReorderBufferEntryWrapper(buffer[i], i);
+            ret.add(wrapper);
+        }
+        return ret;
     }
 }
