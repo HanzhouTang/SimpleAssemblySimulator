@@ -6,7 +6,6 @@ import OutputFile.DataType;
 import OutputFile.ObjFile;
 import OutputFile.Procedure;
 import org.apache.log4j.Logger;
-import org.omg.CORBA.TRANSACTION_MODE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

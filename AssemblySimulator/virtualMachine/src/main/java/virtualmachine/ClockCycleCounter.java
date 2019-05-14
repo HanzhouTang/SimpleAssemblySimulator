@@ -20,4 +20,7 @@ public class ClockCycleCounter {
     void toNextClockCycle() {
         counter++;
     }
+    public void reset(){
+        counter = 0;
+    }
 }

@@ -7,3 +7,5 @@ machine:
     nop: 1
     add: 3
     mov: 2
+    sub: 3
+    mul: 3

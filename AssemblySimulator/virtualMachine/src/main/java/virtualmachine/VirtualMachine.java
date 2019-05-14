@@ -92,6 +92,7 @@ public class VirtualMachine {
     }
 
     public void reset(){
+        clockCycleCounter.reset();
         resetMessageQueue();
         getRegisterManager().reset();
     }

@@ -83,7 +83,7 @@ public class virtualMachineTest {
         URI uri = getClass().getClassLoader().getResource("add_.obj").toURI();
         Assert.assertNotNull(uri);
         String filename = Paths.get(uri).toString();
-        virtualMachine.reset();
+        virtualMacine.reset();
         virtualMachine.loadObjFile(filename);
         virtualMachine.run();
         Queue<Message> q = virtualMachine.getEventRecorder();
@@ -92,5 +92,46 @@ public class virtualMachineTest {
         Assert.assertEquals(26, value);
     }
 
+    @Test
+    public void runSubInstruction() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("sub_.obj").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        virtualMachine.reset();
+        virtualMachine.loadObjFile(filename);
+        virtualMachine.run();
+        Queue<Message> q = virtualMachine.getEventRecorder();
+        //Assert.assertEquals(6, q.size());
+        int value = virtualMachine.getRegisterManager().getRegister("eax").getContent();
+        Assert.assertEquals(0, value);
+    }
 
+
+    @Test
+    public void runSub1Instruction() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("sub1.obj").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        virtualMachine.reset();
+        virtualMachine.loadObjFile(filename);
+        virtualMachine.run();
+        Queue<Message> q = virtualMachine.getEventRecorder();
+        //Assert.assertEquals(6, q.size());
+        int value = virtualMachine.getRegisterManager().getRegister("eax").getContent();
+        Assert.assertEquals(0, value);
+    }
+
+    @Test
+    public void runMulInstruction() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("mul_.obj").toURI();
+        Assert.assertNotNull(uri);
+        String filename = Paths.get(uri).toString();
+        virtualMachine.reset();
+        virtualMachine.loadObjFile(filename);
+        virtualMachine.run();
+        Queue<Message> q = virtualMachine.getEventRecorder();
+        //Assert.assertEquals(6, q.size());
+        int value = virtualMachine.getRegisterManager().getRegister("eax").getContent();
+        Assert.assertEquals(169, value);
+    }
 }
