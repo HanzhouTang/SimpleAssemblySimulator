@@ -9,6 +9,7 @@ import instructions.InstructionBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import render.Render;
+import virtualmachine.RegisterManager;
 import virtualmachine.VirtualMachine;
 
 import java.util.ArrayList;
@@ -87,7 +88,20 @@ public class ReservationStation {
         table[index] = entry;
     }
 
-    @SuppressWarnings("Duplicates")
+
+    private ReservationStationEntry getReservationStationEntryByRegister(Register register, InstructionBase instructionBase,
+                                                                         ReservedTable reservedTable, RegisterManager registerManager) {
+
+        AddressEntry addressEntry = new AddressEntry(register);
+        Integer number = reservedTable.getReversedBy(addressEntry);
+        ReservationStationEntry reservationStationEntry = new ReservationStationEntry(instructionBase, number);
+        if (number == null) {
+            Integer value = registerManager.getRegister(register).getContent();
+            reservationStationEntry.setVj(value);
+        }
+        return reservationStationEntry;
+    }
+
     public boolean issueInstruction(InstructionBase instructionBase, VirtualMachine vm) throws Exception {
         if (isFull()) {
             return false;
@@ -112,13 +126,9 @@ public class ReservationStation {
             Mode mode = instructionBase.getInstruction().getMemRegister().getMode();
             if (Mode.REGISTER.equals(mode)) {
                 Register register = instructionBase.getInstruction().getMemRegister().getRegister();
-                AddressEntry addressEntry = new AddressEntry(register);
-                Integer number = reservedTable.getReversedBy(addressEntry);
-                reservationStationEntry = new ReservationStationEntry(instructionBase, number);
-                if (number == null) {
-                    Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
-                    reservationStationEntry.setVj(value);
-                }
+                reservationStationEntry = getReservationStationEntryByRegister(register, instructionBase,
+                        reservedTable, vm.getRegisterManager());
+
             } else {
                 if (instructionBase.getInstruction().getMemRegister() == null) {
                     reservationStationEntry = new ReservationStationEntry(instructionBase, null);
@@ -167,13 +177,8 @@ public class ReservationStation {
                     reservationStationEntry.setVj(source.getImmediate());
                 } else {
                     Register register = source.getRegister();
-                    AddressEntry addressEntry = new AddressEntry(register);
-                    Integer number = reservedTable.getReversedBy(addressEntry);
-                    reservationStationEntry = new ReservationStationEntry(instructionBase, number);
-                    if (number == null) {
-                        Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
-                        reservationStationEntry.setVj(value);
-                    }
+                    reservationStationEntry = getReservationStationEntryByRegister(register, instructionBase,
+                            reservedTable, vm.getRegisterManager());
                 }
             }
         }

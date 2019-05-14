@@ -47,7 +47,7 @@ public class ReorderBuffer {
         buffer = new ReorderBufferEntry[properties.getReorderBufferSize()];
     }
 
-    @SuppressWarnings("Duplicates")
+    //@SuppressWarnings("Duplicates")
     boolean add(InstructionBase instructionBase, VirtualMachine vm, int reservationIndex) throws Exception {
 
         // need update reservation table here
@@ -96,13 +96,7 @@ public class ReorderBuffer {
     }
 
 
-    /**
-     * I should check if finished by status
-     *
-     * @param vm
-     * @throws Exception
-     */
-    @SuppressWarnings("Duplicates")
+    //@SuppressWarnings("Duplicates")
     public void run(VirtualMachine vm) throws Exception {
         ReservationStation reservationStation = vm.getReservationStation();
         int loc = head % buffer.length;
