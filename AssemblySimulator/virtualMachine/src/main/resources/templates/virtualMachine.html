@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <title>${title}</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <table class="table">
+        <caption>
+            <h1>Register</h1>
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Register</th>
+                <th scope="col">Content</th>
+            </tr>
+        </thead>
+        <tbody>
+            <#list registers as register>
+                <tr>
+                    <td>${register.name}</td>
+                    <td>${register.value}</td>
+                </tr>
+            </#list>
+        </tbody>
+    </table>
+</body>
+
+<body>
+    <table class="table">
+        <caption>
+            <h1>Reorder Buffer</h1>
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Index</th>
+                <th scope="col">Busy</th>
+                <th scope="col">Reorder Buffer State</th>
+                <th scope="col">Reservation Table Index</th>
+                <th scope="col">Destination</th>
+                <th scope="col">Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <#list reorderBufferTable as entry>
+                <tr>
+                    <td>${entry.index}</td>
+                    <td>${entry.busy}</td>
+                    <td>${entry.reorderBufferState}</td>
+                    <td>${entry.reservationIndex}</td>
+                    <td>${entry.address}</td>
+                    <td>${entry.result}</td>
+                </tr>
+            </#list>
+        </tbody>
+    </table>
+
+    <body>
+        <table class="table">
+            <caption>
+                <h1>reservation station</h1>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Index</th>
+                    <th scope="col">Busy</th>
+                    <th scope="col">Instruction</th>
+                    <th scope="col">Vj</th>
+                    <th scope="col">Qj</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list reservationStationTable as entry>
+                    <tr>
+                        <td>${entry.index}</td>
+                        <td>${entry.busy}</td>
+                        <td>${entry.instruction}</td>
+                        <td>${entry.vj}</td>
+                        <td>${entry.qj}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </body>
+
+</html>

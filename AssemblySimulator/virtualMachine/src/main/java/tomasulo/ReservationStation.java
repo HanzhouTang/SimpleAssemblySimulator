@@ -8,7 +8,12 @@ import config.VirtualMachineProperties;
 import instructions.InstructionBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import render.Render;
 import virtualmachine.VirtualMachine;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 @Component
 public class ReservationStation {
@@ -57,6 +62,15 @@ public class ReservationStation {
     }
     // only affect read , write is ok.
 
+    public List<Render.ReservationStationEntryWrapper> toList() {
+        List<Render.ReservationStationEntryWrapper> ret = new ArrayList<>();
+        for (int i = 0; i < table.length; i++) {
+            Render.ReservationStationEntryWrapper wrapper = new Render.ReservationStationEntryWrapper(table[i], i);
+            ret.add(wrapper);
+        }
+        return ret;
+    }
+
     private final ReservationStationEntry[] table;
     //int head = 0;
     int size = 0;
@@ -69,7 +83,8 @@ public class ReservationStation {
     ReservationStationEntry get(int index) {
         return table[index];
     }
-    void set(int index, ReservationStationEntry entry){
+
+    void set(int index, ReservationStationEntry entry) {
         table[index] = entry;
     }
 
@@ -125,7 +140,7 @@ public class ReservationStation {
                                 /* we pretend that the virtual machine has read or write phase. However, in fact, it doesn't. */
                                 /* for now, we assume every operand is 32 bits*/
                                 Integer value = vm.getMemory().get32(memoryAddress);
-                                        //memoryAddress;
+                                //memoryAddress;
                                 reservationStationEntry.setVj(value);
                             }
                         } else {

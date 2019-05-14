@@ -42,7 +42,7 @@ public abstract class InstructionBase {
     protected Integer result = null;
     protected static Logger LOGGER = Logger.getLogger(InstructionBase.class);
     private final Mode mode;
-    private final InstructionBase lastInstructionStatus;
+
 
 
     public Mode getMode() {
@@ -91,9 +91,6 @@ public abstract class InstructionBase {
             return virtualMachine.getRegisterManager().getRegister(r).getContent();
         }
     }
-    /*public Queue<Message> getEventRecorder() {
-        return eventRecorder;
-    }*/
 
     public Integer getSourceValue() {
         return sourceValue;
@@ -107,9 +104,6 @@ public abstract class InstructionBase {
         sourceValue = value;
     }
 
-    public InstructionBase getLastInstructionStatus() {
-        return lastInstructionStatus;
-    }
 
     protected InstructionBase(VirtualMachine virtualMachine, int rc, int ec, int wc, Instruction ins) {
         this.virtualMachine = virtualMachine;
@@ -122,7 +116,7 @@ public abstract class InstructionBase {
         } else {
             mode = instruction.getMemRegister().getMode();
         }
-        lastInstructionStatus = null;
+
         //LOGGER.debug("mode " + mode + " for " + instruction);
     }
 
@@ -134,7 +128,6 @@ public abstract class InstructionBase {
         executionCycle = instructionBase.getExecutionCycle();
         instruction = instructionBase.getInstruction();
         mode = instructionBase.getMode();
-        lastInstructionStatus = instructionBase;
         startCycle = instructionBase.getStartCycle();
         sourceValue = instructionBase.getSourceValue();
     }

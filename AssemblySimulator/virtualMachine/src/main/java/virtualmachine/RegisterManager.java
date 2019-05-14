@@ -4,7 +4,10 @@ import Instructions.Register;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Though the virtual machine will run different instructions in different thread,
@@ -56,5 +59,9 @@ public class RegisterManager {
 
     public void reset() {
         registers.forEach((k, v) -> v.setContent(0));
+    }
+
+    public <T> List<T> toList(Function<Map.Entry<String, PhysicalRegister>, T> f) {
+        return registers.entrySet().stream().map(f).collect(Collectors.toList());
     }
 }

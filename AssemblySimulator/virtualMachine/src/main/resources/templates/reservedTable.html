@@ -1,0 +1,61 @@
+<html>
+
+<head>
+    <title>title</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <table class="table">
+        <caption>
+            <h1>Register reversed table</h1>
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Register</th>
+                <th scope="col">Reorder buffer index</th>
+            </tr>
+        </thead>
+        <tbody>
+            <#list registerReservedTable as entry>
+                <tr>
+                    <td>${entry.key}</td>
+                    <td>${entry.value}</td>
+                </tr>
+            </#list>
+        </tbody>
+    </table>
+</body>
+
+
+<body>
+    <table class="table">
+        <caption>
+            <h1>Memory reversed table</h1>
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Memory Address</th>
+                <th scope="col">Reorder buffer index</th>
+            </tr>
+        </thead>
+        <tbody>
+            <#list memoryReservedTable as entry>
+                <tr>
+                    <td>${entry.key}</td>
+                    <td>${entry.value}</td>
+                </tr>
+            </#list>
+        </tbody>
+    </table>
+</body>
+
+
+</html>
