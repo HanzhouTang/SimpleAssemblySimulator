@@ -23,8 +23,9 @@ public class FreeMarkerConfig {
 
     FreeMarkerConfig() throws Exception {
         cfg = new Configuration();
-        URI uri = getClass().getClassLoader().getResource("templates").toURI();
-        cfg.setDirectoryForTemplateLoading(Paths.get(uri).toFile());
+        cfg.setClassForTemplateLoading(this.getClass(), "/templates");
+        /*URI uri = getClass().getClassLoader().getResource("templates").toURI();
+        cfg.setDirectoryForTemplateLoading(Paths.get(uri).toFile());*/
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     }

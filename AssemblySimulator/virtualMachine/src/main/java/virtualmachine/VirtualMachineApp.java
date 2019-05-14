@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 
 @EnableConfigurationProperties
-@SpringBootApplication(scanBasePackages = {"virtualmachine","config","tomasulo","render"})
+@SpringBootApplication(scanBasePackages = {"virtualmachine", "config", "tomasulo", "render"})
 public class VirtualMachineApp implements CommandLineRunner {
     private static Logger LOGGER = Logger.getLogger(VirtualMachineApp.class);
 
@@ -33,7 +33,8 @@ public class VirtualMachineApp implements CommandLineRunner {
             virtualMachine.loadObjFile(objFileName);
             virtualMachine.run();
         } else {
-            throw new Exception("must specify an obj file name");
+            LOGGER.warn("must specify an obj file name");
+            //throw new Exception("must specify an obj file name");
         }
 
     }
