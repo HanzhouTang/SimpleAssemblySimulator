@@ -2,42 +2,43 @@
 
 <head>
     <title>title</title>
-    <!-- Latest compiled and minified CSS -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-    <table class="table">
-            <caption><h1>${title}</h1></caption>
-        <thead>
-            <tr>
-                <th scope="col">Index</th>
-                <th scope="col">Busy</th>
-                <th scope="col">Reorder Buffer State</th>
-                <th scope="col">Reservation Table Index</th>
-                <th scope="col">Destination</th>
-                <th scope="col">Result</th>
-            </tr>
-        </thead>
-        <tbody>
-            <#list reorderBufferTable as entry>
+    <div class="container">
+        <table class="table">
+            <caption>
+                <h1>${title}</h1>
+            </caption>
+            <thead>
                 <tr>
-                    <td>${entry.index}</td>
-                    <td>${entry.busy}</td>
-                    <td>${entry.reorderBufferState}</td>
-                    <td>${entry.reservationIndex}</td>
-                    <td>${entry.address}</td>
-                    <td>${entry.result}</td>
+                    <th scope="col">Index</th>
+                    <th scope="col">Busy</th>
+                    <th scope="col">Reorder Buffer State</th>
+                    <th scope="col">Reservation Table Index</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Result</th>
                 </tr>
-            </#list>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <#list reorderBufferTable as entry>
+                    <tr>
+                        <td>${entry.index}</td>
+                        <td>${entry.busy}</td>
+                        <td>${entry.reorderBufferState}</td>
+                        <td>${entry.reservationIndex}</td>
+                        <td>${entry.address}</td>
+                        <td>${entry.result}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>

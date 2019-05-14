@@ -2,34 +2,36 @@
 
 <head>
     <title>title</title>
-    <!-- Latest compiled and minified CSS -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
 </head>
 
 <body>
-    <table class="table">
-            <caption><h1>${title}</h1></caption>
-        <thead>
-            <tr>
-                <th scope="col">Register</th>
-                <th scope="col">Content</th>
-            </tr>
-        </thead>
-        <tbody>
-            <#list registers as register>
+    <div class="container">
+        <table class="table">
+            <caption>
+                <h1>${title}</h1>
+            </caption>
+            <thead>
                 <tr>
-                    <td>${register.name}</td>
-                    <td>${register.value}</td>
+                    <th scope="col">Register</th>
+                    <th scope="col">Content</th>
                 </tr>
-            </#list>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <#list registers as register>
+                    <tr>
+                        <td>${register.name}</td>
+                        <td>${register.value}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>

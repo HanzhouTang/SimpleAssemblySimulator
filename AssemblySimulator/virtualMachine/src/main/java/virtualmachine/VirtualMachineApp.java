@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 
 @EnableConfigurationProperties
-@SpringBootApplication(scanBasePackages = {"virtualmachine","config","tomasulo"})
+@SpringBootApplication(scanBasePackages = {"virtualmachine","config","tomasulo","render"})
 public class VirtualMachineApp implements CommandLineRunner {
     private static Logger LOGGER = Logger.getLogger(VirtualMachineApp.class);
 

@@ -8,15 +8,8 @@ import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.log4j.Logger;
 import tomasulo.Dependency;
 import tomasulo.DependencyFactory;
-import virtualmachine.ClockCycleCounter;
 import virtualmachine.Message;
 import virtualmachine.VirtualMachine;
-
-
-import javax.swing.plaf.PanelUI;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.function.Supplier;
 
 /**
  * The base class of instruction. It implement Runable interface.
@@ -83,7 +76,7 @@ public abstract class InstructionBase {
         if (Mode.SIB_DISPLACEMENT_FOLLOWED.equals(dest_mode) || Mode.SIB.equals(dest_mode)
                 || Mode.INDIRECT_DISPLACEMENT_FOLLOWED.equals(dest_mode) || Mode.INDIRECT.equals(dest_mode) || Mode.DISPLACEMENT_ONLY.equals(dest_mode)) {
             Dependency dependency = DependencyFactory.createDependency(destination);
-            dependency.getNeededReorderBufferNumber(virtualMachine.getReversedTable(), virtualMachine.getRegisterManager());
+            dependency.getNeededReorderBufferNumber(virtualMachine.getReservedTable(), virtualMachine.getRegisterManager());
             int mem = dependency.getAddress();
             return virtualMachine.getMemory().get32(mem);
         } else {

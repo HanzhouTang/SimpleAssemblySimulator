@@ -7,18 +7,15 @@ import instructions.InstructionFactory;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+import render.Render;
 import tomasulo.ReorderBuffer;
 import tomasulo.ReservationStation;
-import tomasulo.ReversedTable;
+import tomasulo.ReservedTable;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Supplier;
 
 /**
  * The virtual machine class.
@@ -52,11 +49,21 @@ public class VirtualMachine {
     ReorderBuffer reorderBuffer;
 
     @Autowired
-    ReversedTable reversedTable;
+    ReservedTable reservedTable;
 
+
+    @Autowired
+    Render render;
     int finalPoint = 0;
 
     Queue<Message> eventRecorder = new LinkedList<>();
+
+    public List<Message> getMessages() {
+        List<Message> msgs = new ArrayList<>();
+        msgs.addAll(eventRecorder);
+        return msgs;
+    }
+
     private static Logger LOGGER = Logger.getLogger(VirtualMachine.class);
 
     public RegisterManager getRegisterManager() {
@@ -67,8 +74,8 @@ public class VirtualMachine {
         return reorderBuffer;
     }
 
-    public ReversedTable getReversedTable() {
-        return reversedTable;
+    public ReservedTable getReservedTable() {
+        return reservedTable;
     }
 
     public ReservationStation getReservationStation() {
@@ -87,11 +94,11 @@ public class VirtualMachine {
         return eventRecorder;
     }
 
-    public void resetMessageQueue(){
+    public void resetMessageQueue() {
         eventRecorder.clear();
     }
 
-    public void reset(){
+    public void reset() {
         resetMessageQueue();
         getRegisterManager().reset();
     }
@@ -144,16 +151,18 @@ public class VirtualMachine {
             if (issueInstruction(nextInstruction)) {
                 nextInstruction = getNextInstruction();
             }
-            Thread.sleep(300);
+            //Thread.sleep(300);
+            render.virtualMachineToHtml(this,"virtual-machine-status");
             clockCycleCounter.toNextClockCycle();
         }
         runUntilReorderBufferIsEmpty();
     }
 
-    private void runUntilReorderBufferIsEmpty() throws Exception{
+    private void runUntilReorderBufferIsEmpty() throws Exception {
         while (!reorderBuffer.isEmpty()) {
             reorderBuffer.run(this);
             //Thread.sleep(300);
+            render.virtualMachineToHtml(this,"virtual-machine-status");
             clockCycleCounter.toNextClockCycle();
         }
     }

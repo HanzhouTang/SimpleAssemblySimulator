@@ -13,7 +13,6 @@ import virtualmachine.VirtualMachine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @Component
 public class ReservationStation {
@@ -94,7 +93,7 @@ public class ReservationStation {
             return false;
         }
         ReorderBuffer reorderBuffer = vm.getReorderBuffer();
-        ReversedTable reversedTable = vm.getReversedTable();
+        ReservedTable reservedTable = vm.getReservedTable();
         int location = -1;
         for (int i = 0; i < table.length; i++) {
             if (table[i] == null) {
@@ -114,7 +113,7 @@ public class ReservationStation {
             if (Mode.REGISTER.equals(mode)) {
                 Register register = instructionBase.getInstruction().getMemRegister().getRegister();
                 AddressEntry addressEntry = new AddressEntry(register);
-                Integer number = reversedTable.getReversedBy(addressEntry);
+                Integer number = reservedTable.getReversedBy(addressEntry);
                 reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                 if (number == null) {
                     Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();
@@ -127,12 +126,12 @@ public class ReservationStation {
                     Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
                     Integer dependedReorderBufferIndex = null;
                     if (dependency != null) {
-                        dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager());
+                        dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reservedTable, vm.getRegisterManager());
                         if (dependedReorderBufferIndex == null) {
                             // the source address can be known, for example, if source is [eax] the eax is not reversed by others.
                             Integer memoryAddress = dependency.getAddress();
                             AddressEntry addressEntry = new AddressEntry(memoryAddress);
-                            Integer number = reversedTable.getReversedBy(addressEntry);
+                            Integer number = reservedTable.getReversedBy(addressEntry);
                             // if some instruction will write to the address, for example, if source is [eax] eax = 1, check if some instruction is writing to [1]
                             reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                             if (number == null) {
@@ -167,7 +166,7 @@ public class ReservationStation {
                 } else {
                     Register register = source.getRegister();
                     AddressEntry addressEntry = new AddressEntry(register);
-                    Integer number = reversedTable.getReversedBy(addressEntry);
+                    Integer number = reservedTable.getReversedBy(addressEntry);
                     reservationStationEntry = new ReservationStationEntry(instructionBase, number);
                     if (number == null) {
                         Integer value = vm.getRegisterManager().getRegister(instructionBase.getInstruction().getMemRegister().getRegister()).getContent();

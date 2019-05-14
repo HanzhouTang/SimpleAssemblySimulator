@@ -10,7 +10,7 @@ import render.FreeMarkerConfig;
 import render.Render;
 import tomasulo.ReorderBuffer;
 import tomasulo.ReservationStation;
-import tomasulo.ReversedTable;
+import tomasulo.ReservedTable;
 import virtualmachine.ClockCycleCounter;
 import virtualmachine.Memory;
 import virtualmachine.RegisterManager;
@@ -20,9 +20,9 @@ import virtualmachine.VirtualMachine;
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 @SpringBootTest(classes = {FreeMarkerConfig.class, Render.class, VirtualMachine.class,
-        ClockCycleCounter.class, Memory.class, ReversedTable.class,
+        ClockCycleCounter.class, Memory.class, ReservedTable.class,
         RegisterManager.class, VirtualMachineProperties.class,
-        ReservationStation.class, ReorderBuffer.class})
+        ReservationStation.class, ReorderBuffer.class, ReservedTable.class})
 public class RenderTest {
     @Autowired
     VirtualMachine virtualMachine;
@@ -35,6 +35,8 @@ public class RenderTest {
     @Autowired
     ReorderBuffer reorderBuffer;
 
+    @Autowired
+    ReservedTable reservedTable;
     @Test
     public void RegisterRenderTest() throws Exception {
         render.registerToHtml(registerManager, "registerStatus");
@@ -52,6 +54,11 @@ public class RenderTest {
 
     @Test
     public void VirtualMachineTest() throws Exception {
-        render.ReorderVirtualMachineToHtml(virtualMachine, "virtual machine");
+        render.virtualMachineToHtml(virtualMachine, "virtual machine");
+    }
+
+    @Test
+    public void ReservedTableTest() throws Exception {
+        render.ReservedTableToHtml(reservedTable, "reserved table");
     }
 }

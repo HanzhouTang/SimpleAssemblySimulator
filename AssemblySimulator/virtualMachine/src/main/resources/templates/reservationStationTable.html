@@ -2,40 +2,41 @@
 
 <head>
     <title>title</title>
-    <!-- Latest compiled and minified CSS -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-    <table class="table">
-            <caption><h1>${title}</h1></caption>
-        <thead>
-            <tr>
-                <th scope="col">Index</th>
-                <th scope="col">Busy</th>
-                <th scope="col">Instruction</th>
-                <th scope="col">Vj</th>
-                <th scope="col">Qj</th>
-            </tr>
-        </thead>
-        <tbody>
-            <#list reservationStationTable as entry>
+    <div class="container">
+        <table class="table">
+            <caption>
+                <h1>${title}</h1>
+            </caption>
+            <thead>
                 <tr>
-                    <td>${entry.index}</td>
-                    <td>${entry.busy}</td>
-                    <td>${entry.instruction}</td>
-                    <td>${entry.vj}</td>
-                    <td>${entry.qj}</td>
+                    <th scope="col">Index</th>
+                    <th scope="col">Busy</th>
+                    <th scope="col">Instruction</th>
+                    <th scope="col">Vj</th>
+                    <th scope="col">Qj</th>
                 </tr>
-            </#list>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <#list reservationStationTable as entry>
+                    <tr>
+                        <td>${entry.index}</td>
+                        <td>${entry.busy}</td>
+                        <td>${entry.instruction}</td>
+                        <td>${entry.vj}</td>
+                        <td>${entry.qj}</td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>

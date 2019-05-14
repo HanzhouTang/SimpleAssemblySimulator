@@ -15,7 +15,7 @@ public class SibDependency extends Dependency {
 
     @Override
     @SuppressWarnings("Duplicates")
-    public Integer getNeededReorderBufferNumber(ReversedTable table, RegisterManager registerManager) {
+    public Integer getNeededReorderBufferNumber(ReservedTable table, RegisterManager registerManager) {
         if (index != null) {
             AddressEntry addressEntry = new AddressEntry(index);
             //ReversedTable.ReversedEntry entry = new ReversedTable.ReversedEntry(ReversedTable.KeyType.REGISTER, null, index);

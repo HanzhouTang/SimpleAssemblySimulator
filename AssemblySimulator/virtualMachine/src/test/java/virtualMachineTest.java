@@ -3,7 +3,6 @@ import Instructions.OpCode;
 import config.VirtualMachineProperties;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,22 +10,23 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import render.FreeMarkerConfig;
+import render.Render;
 import tomasulo.ReorderBuffer;
 import tomasulo.ReservationStation;
-import tomasulo.ReversedTable;
+import tomasulo.ReservedTable;
 import virtualmachine.*;
 
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ClockCycleCounter.class, Memory.class,
         RegisterManager.class, VirtualMachine.class, VirtualMachineProperties.class,
-        ReorderBuffer.class, ReservationStation.class, ReversedTable.class})
+        ReorderBuffer.class, ReservationStation.class, ReservedTable.class, Render.class, FreeMarkerConfig.class})
 public class virtualMachineTest {
 
     private static Logger LOGGER = Logger.getLogger(virtualMachineTest.class);

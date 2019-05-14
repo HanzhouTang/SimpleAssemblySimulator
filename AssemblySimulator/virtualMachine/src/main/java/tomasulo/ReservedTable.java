@@ -5,14 +5,12 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
-public class ReversedTable {
-    private static Logger LOGGER = Logger.getLogger(ReversedTable.class);
+public class ReservedTable {
+    private static Logger LOGGER = Logger.getLogger(ReservedTable.class);
     final private Map<Integer, Integer> memoryReversedTable = new HashMap<>();
     final private Map<Register, Integer> registerMapReversedTable = new HashMap<>();
 
@@ -41,11 +39,11 @@ public class ReversedTable {
         }
     }
 
-    Set<Map.Entry<Integer, Integer>> memoryToSet() {
+    public Set<Map.Entry<Integer, Integer>> memoryToSet() {
         return memoryReversedTable.entrySet();
     }
 
-    Set<Map.Entry<Register, Integer>> registerToSet() {
+    public Set<Map.Entry<Register, Integer>> registerToSet() {
         return registerMapReversedTable.entrySet();
     }
 }

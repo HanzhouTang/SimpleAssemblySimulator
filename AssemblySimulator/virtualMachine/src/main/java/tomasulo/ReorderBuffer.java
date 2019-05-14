@@ -55,12 +55,12 @@ public class ReorderBuffer {
             return false;
         }
         AddressEntry dest = null;
-        ReversedTable reversedTable = vm.getReversedTable();
+        ReservedTable reservedTable = vm.getReservedTable();
         Mode mode = instructionBase.getMode();
         if (instructionBase.getInstruction().isFromMemToReg()) {
             Register register = instructionBase.getInstruction().getRegister().getRegister();
             dest = new AddressEntry(register);
-            reversedTable.add(dest, size);
+            reservedTable.add(dest, size);
         } else {
             Mode memRegMode = null;
             if (instructionBase.getInstruction().getMemRegister() != null) {
@@ -69,16 +69,16 @@ public class ReorderBuffer {
             if (Mode.REGISTER.equals(memRegMode)) {
                 Register register = instructionBase.getInstruction().getMemRegister().getRegister();
                 dest = new AddressEntry(register);
-                reversedTable.add(dest, size);
+                reservedTable.add(dest, size);
             } else {
                 Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
                 Integer dependedReorderBufferIndex = null;
                 if (dependency != null) {
-                    dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reversedTable, vm.getRegisterManager());
+                    dependedReorderBufferIndex = dependency.getNeededReorderBufferNumber(reservedTable, vm.getRegisterManager());
                     if (dependedReorderBufferIndex == null) {
                         Integer memory = dependency.getAddress();
                         dest = new AddressEntry(memory);
-                        reversedTable.add(dest, size);
+                        reservedTable.add(dest, size);
                     } else {
                         vm.sendMessage("The destination address of instruction "
                                 + instructionBase.getInstruction() +
@@ -120,8 +120,8 @@ public class ReorderBuffer {
                 }
             }
             if (entry.dest != null) {
-                ReversedTable reversedTable = vm.getReversedTable();
-                reversedTable.remove(entry.dest);
+                ReservedTable reservedTable = vm.getReservedTable();
+                reservedTable.remove(entry.dest);
             }
             ReservationStation.ReservationStationEntry oldEntry = reservationStation.get(entry.reservationIndex);
             ReservationStation.ReservationStationEntry newEntry = new ReservationStation.ReservationStationEntry(entry.executedInstruction, null);
