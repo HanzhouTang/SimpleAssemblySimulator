@@ -225,10 +225,9 @@ public class Instruction {
         if (isImmediate) {
             builder.append("000");
         } else {
-            if(register!=null){
+            if (register != null) {
                 builder.append(register.getRegister().getRegisterCode());
-            }
-            else{
+            } else {
                 builder.append("000");
             }
 
@@ -329,11 +328,11 @@ public class Instruction {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(opcode.toString());
-        if(getDestination()!=null){
+        if (getDestination() != null) {
             builder.append(' ');
             builder.append(getDestination().toString());
         }
-        if(getSource()!=null){
+        if (getSource() != null) {
             builder.append(", ");
             builder.append(getSource().toString());
         }
@@ -526,10 +525,14 @@ public class Instruction {
             register = new Operand.Builder().register(register_reg).build();
         }
         Instruction ret = null;
-        if (isFromMemToReg) {
-            ret = new Instruction(op.get(), register, memRegister);
+        if (OpCode.NOP.equals(op.get()) || OpCode.RET.equals(op.get())) {
+            ret = new Instruction(op.get(), null, null);
         } else {
-            ret = new Instruction(op.get(), memRegister, register);
+            if (isFromMemToReg) {
+                ret = new Instruction(op.get(), register, memRegister);
+            } else {
+                ret = new Instruction(op.get(), memRegister, register);
+            }
         }
         LOGGER.info("convert to instruction { " + ret + " }");
         return ret;

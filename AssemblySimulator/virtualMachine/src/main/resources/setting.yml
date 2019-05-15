@@ -1,0 +1,18 @@
+machine:
+  outputDir: C:\Users\tangh\source\repos\AssemblySimulator\AssemblySimulator\virtualMachine\out\test\renderResult
+  loadMemoryNeededCycle: 3
+  saveMemoryNeededCycle: 3
+  reorderBufferSize: 50
+  reservationStationSize: 50
+  executionTime:
+    nop: 1
+    add: 3
+    mov: 2
+    sub: 3
+    mul: 3
+    div: 3
+    not: 2
+    or: 2
+    shl: 2
+    shr: 2
+    xor: 2

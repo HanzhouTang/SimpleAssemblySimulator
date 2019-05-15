@@ -14,10 +14,20 @@ plugins {
     id 'java'
     id 'maven'
 }
-
 apply plugin: 'org.springframework.boot'
-group 'simpleAssembler'
+
+group 'virtualMachine'
 version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
 
 sourceCompatibility = 1.8
 
@@ -27,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile group: "${group}", name: 'Instruction', version: "${version}", changing: true
+    compile group: "simpleAssembler", name: 'Instruction', version: "${version}", changing: true
     compile group: 'log4j', name: 'log4j', version: '1.2.16'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
@@ -37,6 +47,10 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-aop', version: '5.0.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-test', version: '5.0.2.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.1.4.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: '2.1.4.RELEASE'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.24'
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.4.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
