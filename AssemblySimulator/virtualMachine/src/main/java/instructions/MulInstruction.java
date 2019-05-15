@@ -3,12 +3,12 @@ package instructions;
 import Instructions.Instruction;
 import virtualmachine.VirtualMachine;
 
-public class MultInstruction extends InstructionBase {
-    public MultInstruction(VirtualMachine vm, int rc, int ec, int wc, Instruction ins) {
+public class MulInstruction extends InstructionBase {
+    public MulInstruction(VirtualMachine vm, int rc, int ec, int wc, Instruction ins) {
         super(vm, rc, ec, wc, ins);
     }
 
-    protected MultInstruction(InstructionBase mul) {
+    protected MulInstruction(InstructionBase mul) {
         super(mul);
     }
 
@@ -22,6 +22,6 @@ public class MultInstruction extends InstructionBase {
 
     @Override
     final public InstructionBase copy() {
-        return new MultInstruction(this);
+        return new MulInstruction(this);
     }
 }

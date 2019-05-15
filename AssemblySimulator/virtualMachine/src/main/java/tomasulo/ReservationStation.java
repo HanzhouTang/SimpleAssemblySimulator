@@ -6,6 +6,7 @@ import Instructions.Operand;
 import Instructions.Register;
 import config.VirtualMachineProperties;
 import instructions.InstructionBase;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import render.Render;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Component
 public class ReservationStation {
+    private static Logger LOGGER = Logger.getLogger(ReservationStation.class);
 
     public static class ReservationStationEntry {
         boolean isBusy;
@@ -54,9 +56,10 @@ public class ReservationStation {
         }
 
 
-        public ReservationStationEntry(final InstructionBase ins, Integer orderBufferNumber) {
+        public ReservationStationEntry(final InstructionBase ins, Integer orderBufferNumber, boolean isBusy) {
             // orderBufferNumber is the index of re-order buffer for source.
             instruction = ins;
+            this.isBusy = isBusy;
             qj = orderBufferNumber;
         }
     }
@@ -94,7 +97,7 @@ public class ReservationStation {
 
         AddressEntry addressEntry = new AddressEntry(register);
         Integer number = reservedTable.getReversedBy(addressEntry);
-        ReservationStationEntry reservationStationEntry = new ReservationStationEntry(instructionBase, number);
+        ReservationStationEntry reservationStationEntry = new ReservationStationEntry(instructionBase, number, true);
         if (number == null) {
             Integer value = registerManager.getRegister(register).getContent();
             reservationStationEntry.setVj(value);
@@ -110,7 +113,7 @@ public class ReservationStation {
         ReservedTable reservedTable = vm.getReservedTable();
         int location = -1;
         for (int i = 0; i < table.length; i++) {
-            if (table[i] == null) {
+            if (table[i] == null || !table[i].isBusy) {
                 location = i;
                 break;
 
@@ -131,7 +134,7 @@ public class ReservationStation {
 
             } else {
                 if (instructionBase.getInstruction().getMemRegister() == null) {
-                    reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+                    reservationStationEntry = new ReservationStationEntry(instructionBase, null, true);
                 } else {
                     Dependency dependency = DependencyFactory.createDependency(instructionBase.getInstruction().getMemRegister());
                     Integer dependedReorderBufferIndex = null;
@@ -143,7 +146,7 @@ public class ReservationStation {
                             AddressEntry addressEntry = new AddressEntry(memoryAddress);
                             Integer number = reservedTable.getReversedBy(addressEntry);
                             // if some instruction will write to the address, for example, if source is [eax] eax = 1, check if some instruction is writing to [1]
-                            reservationStationEntry = new ReservationStationEntry(instructionBase, number);
+                            reservationStationEntry = new ReservationStationEntry(instructionBase, number, true);
                             if (number == null) {
 
                                 /* read from memory */
@@ -170,10 +173,10 @@ public class ReservationStation {
         } else {
             Operand source = instructionBase.getInstruction().getRegister();
             if (source == null) {
-                reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+                reservationStationEntry = new ReservationStationEntry(instructionBase, null, true);
             } else {
                 if (Mode.IMMEDIATE.equals(source.getMode())) {
-                    reservationStationEntry = new ReservationStationEntry(instructionBase, null);
+                    reservationStationEntry = new ReservationStationEntry(instructionBase, null, true);
                     reservationStationEntry.setVj(source.getImmediate());
                 } else {
                     Register register = source.getRegister();
@@ -192,8 +195,25 @@ public class ReservationStation {
         return table.length == size;
     }
 
+    public void postResult(int result, int index) {
+        //LOGGER.info("set result for index #"+index+" result is "+result);
+        for (int i = 0; i < table.length; i++) {
+            if (table[i] != null && table[i].isBusy()) {
+                if (table[i].getQj() != null && table[i].getQj() == index) {
+                    InstructionBase instructionBase = table[i].getInstruction();
+                    ReservationStationEntry reservationStationEntry = new ReservationStationEntry(instructionBase, null, false);
+                    reservationStationEntry.setVj(result);
+                    table[i] = reservationStationEntry;
+                }
+
+            }
+        }
+
+        //LOGGER.info("after set result reorderBufferEntry index #"+index+" qj "+reservationStationEntry.getQj()+" vj "+reservationStationEntry.getVj());
+    }
+
     void removeEntry(int location) {
-        table[location] = null;
+        table[location].isBusy = false;
         size--;
     }
 

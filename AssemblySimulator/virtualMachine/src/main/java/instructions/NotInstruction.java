@@ -15,7 +15,8 @@ public class NotInstruction extends InstructionBase {
     @Override
     final public Result executeInstruction() throws Exception {
         LOGGER.debug("source value " + getSourceValue() + " for instruction " + getInstruction());
-        return new Result(~getSourceValue(), copyWithResult(result), Result.ResultState.EXEC_COMPLETE);
+        int result = ~getSourceValue();
+        return new Result(result, copyWithResult(result), Result.ResultState.EXEC_COMPLETE);
     }
 
     @Override

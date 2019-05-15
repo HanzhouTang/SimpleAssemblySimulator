@@ -117,10 +117,10 @@ public class ReorderBuffer {
                 ReservedTable reservedTable = vm.getReservedTable();
                 reservedTable.remove(entry.dest);
             }
-            ReservationStation.ReservationStationEntry oldEntry = reservationStation.get(entry.reservationIndex);
-            ReservationStation.ReservationStationEntry newEntry = new ReservationStation.ReservationStationEntry(entry.executedInstruction, null);
-            newEntry.setVj(entry.result.getResult());
-            reservationStation.set(entry.reservationIndex, newEntry);
+            if (entry.result != null && entry.result.getResult() != null) {
+                reservationStation.postResult(entry.result.getResult(), loc);
+            }
+            reservationStation.removeEntry(entry.reservationIndex);
             removeFirstEntry();
         }
         for (int i = 0; i < size; i++) {
@@ -134,7 +134,7 @@ public class ReorderBuffer {
                     if (reservationStationEntry.getQj() == null) {
                         entry.executedInstruction.setSourceValue(reservationStationEntry.getVj());
                         // reservationStationEntry become useless
-                        reservationStation.removeEntry(entry.reservationIndex);
+
                         entry.executedInstruction.setStartCycle(vm.getClockCycleCounter().getCurrentClockCycle());
                         Result r = entry.executedInstruction.execute(vm.getClockCycleCounter().getCurrentClockCycle());
                         InstructionBase next = r == null ? null : r.getInstructionBase();
@@ -145,6 +145,7 @@ public class ReorderBuffer {
                             new_entry = new ReorderBufferEntry(next, true, r, ReorderBufferState.EXEC, entry.reservationIndex, entry.dest);
                         }
                     } else {
+                        LOGGER.info("ReorderBufferEntry index #" + entry.reservationIndex + " qj " + reservationStationEntry.getQj() + " vj " + reservationStationEntry.getVj());
                         vm.sendMessage("Instruction " + entry.executedInstruction.getInstruction() + " is wait for buffer entry #" + reservationStationEntry.getQj());
                         new_entry = new ReorderBufferEntry(entry.executedInstruction, true, null, ReorderBufferState.WAIT_EXEC, entry.reservationIndex, entry.dest);
                     }
@@ -163,8 +164,9 @@ public class ReorderBuffer {
             } else {
                 // push result to common data bus
                 if (ReorderBufferState.WAIT_COMMIT.equals(entry.state)) {
-                    ReservationStation.ReservationStationEntry reservationStationEntry = reservationStation.get(entry.reservationIndex);
-                    reservationStationEntry.setVj(entry.result.getResult());
+                    if (entry.result != null && entry.result.getResult() != null) {
+                        reservationStation.postResult(entry.result.getResult(), index);
+                    }
                 }
             }
         }

@@ -10,3 +10,9 @@ machine:
     mov: 2
     sub: 3
     mul: 3
+    div: 3
+    not: 2
+    or: 2
+    shl: 2
+    shr: 2
+    xor: 2

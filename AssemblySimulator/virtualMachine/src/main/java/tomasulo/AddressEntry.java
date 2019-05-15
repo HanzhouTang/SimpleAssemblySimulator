@@ -3,7 +3,7 @@ package tomasulo;
 import Instructions.Register;
 
 public class AddressEntry {
-    enum Type {MEMORY, REGISTER}
+    enum Type {MEMORY, REGISTER, STACK}
 
     final Register register;
     final Integer memoryAddress;
@@ -17,6 +17,12 @@ public class AddressEntry {
         this.register = register;
         this.memoryAddress = null;
         type = Type.REGISTER;
+    }
+
+    public AddressEntry() {
+        type = Type.STACK;
+        register = null;
+        memoryAddress = null;
     }
 
     public AddressEntry(Integer i) {
